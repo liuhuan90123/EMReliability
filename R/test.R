@@ -21,3 +21,25 @@ hello <- function() {
 reliabilityProject <- function(){
   print("Reliability Project!")
 }
+
+### install package from github
+
+if(!require(devtools)) install_github("devtools")
+library(devtools)
+if(!require(Reliability)) install_github("liuhuan90123/Reliability")
+library(Reliability)
+
+### read data
+RCG <- read.csv("TestData/RCG.csv", header = T)
+
+CronbachAlpha(RCG)
+Feldt(RCG)
+
+
+
+
+
+
+
+
+
