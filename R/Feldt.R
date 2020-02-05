@@ -1,5 +1,5 @@
-### Feldt
-
+#' @title Feldt
+#' @export
 
 Feldt <- function(dat){
   # sum of total variance

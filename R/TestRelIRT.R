@@ -1,10 +1,14 @@
-### Test Realiability of IRT 2PL
-
-library(statmod)
-library(classify)
-
-# read item parameters from txt file
-itemPara <- read.table("TestData/ItemParaFormX.txt")
+#' @title TestRelIRT
+#'
+#' @description
+#' A function to calculate marginal reliability of 2PL IRT with MLE
+#'
+#' @param itemPara a text file
+#' @return a reliability number
+#'
+#' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
+#'
+#' @export
 
 TestRelIRT <- function(itemPara){
 
@@ -95,4 +99,4 @@ TestRelIRT <- function(itemPara){
 }
 
 
-TestRelIRT(itemPara)
+
