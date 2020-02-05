@@ -58,7 +58,7 @@ TestRelIRT <- function(itemPara){
   numQuad <- 41
 
   # define matrix of marginal distribution of theta
-  fxTheta <- matrix(NA, nrow = numQuad, ncol = 41) # 41 num of quadratures, 41 num of items
+  fxTheta <- matrix(NA, nrow = numQuad, ncol = 41) # 41 num of quadratures, 41 num of raw sxores
 
   # calculate marginal distribution of theta
   for (i in 1:numQuad){

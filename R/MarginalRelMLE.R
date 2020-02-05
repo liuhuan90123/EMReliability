@@ -3,7 +3,7 @@
 #' @description
 #' A function to calculate marginal reliability of 2PL IRT with MLE
 #'
-#' @param itemPara a text file
+#' @param itemPara a text file with parameters of sequence b and a, a is on the 1.7 metric
 #' @return a reliability number
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
@@ -12,7 +12,7 @@
 
 MarginalRelMLE <- function(itemPara){
 
-  # transform item parameters to the logistic metric
+  # transform item parameters to the 1.7 metric
   names(itemPara) <- c("b", "a")
   itemPara[,"a"] <- itemPara[,"a"]/1.701
 

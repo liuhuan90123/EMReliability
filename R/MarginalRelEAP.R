@@ -1,3 +1,13 @@
+#' @title Marginal Reliability of IRT 2PL: EAP
+#'
+#' @description
+#' A function to calculate marginal reliability of 2PL IRT with EAP
+#'
+#' @param itemPara a text file with parameters of sequence b and a, a is on the 1.7 metric
+#' @return a reliability number
+#'
+#' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
+#'
 #' @export
 
 
@@ -5,7 +15,7 @@ MarginalRelEAP <- function(itemPara){
   if (missing(itemPara)) {
     stop("You should have itemPara!!")
   }
-  # transform item parameters to the logistic metric
+  # transform item parameters to the 1.7 metric
   names(itemPara) <- c("b", "a")
   itemPara[,"a"] <- itemPara[,"a"]/1.701
 
