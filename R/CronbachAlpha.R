@@ -1,4 +1,6 @@
-### Cronbach's Alpha
+#' @title Cronbach's Alpha
+#' @export
+
 
 CronbachAlpha <- function(dat){
   # num of culomns

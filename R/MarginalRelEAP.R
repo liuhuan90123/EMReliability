@@ -1,12 +1,10 @@
-### Marginal Reliability of IRT 2PL: EAP
+#' @export
 
-library(statmod)
-
-# read item parameters from txt file
-itemPara <- read.table("TestData/ItemParaFormX.txt")
 
 MarginalRelEAP <- function(itemPara){
-
+  if (missing(itemPara)) {
+    stop("You should have itemPara!!")
+  }
   # transform item parameters to the logistic metric
   names(itemPara) <- c("b", "a")
   itemPara[,"a"] <- itemPara[,"a"]/1.701
@@ -44,7 +42,7 @@ MarginalRelEAP <- function(itemPara){
 }
 
 
-MarginalRelEAP(itemPara)
+
 
 
 

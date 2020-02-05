@@ -1,11 +1,15 @@
-Package: Reliability
+Package: EMReliability
 Type: Package
 Title: Reliability coefficient calculation in CTT, IRT, and GT
 Version: 0.1.0
-Author: Who wrote it
+Author: Huan Liu, Jihong Zhang
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
 Encoding: UTF-8
+BugReports: https://github.com/liuhuan90123/EMReliability
+Imports:
+  statmod
+RoxygenNote: 6.1.1
 LazyData: true
