@@ -79,7 +79,7 @@ TestRelIRT <- function(itemPara){
 
   # sum weighted distribution
   fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:41]), nrow = 41, ncol = 1))
-  fxDist$X <- c(40:0)
+  fxDist$X <- c(nrow(itemPara):0)
   names(fxDist) <- c("wts", "X")
 
   # weighted mean of Obs X
