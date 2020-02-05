@@ -19,15 +19,15 @@ hello <- function() {
 
 
 reliabilityProject <- function(){
-  print("Reliability Project!")
+  print("EMReliability Project!")
 }
 
 ### install package from github
 
 if(!require(devtools)) install_github("devtools")
 library(devtools)
-if(!require(Reliability)) install_github("liuhuan90123/Reliability")
-library(Reliability)
+if(!require(EMReliability)) install_github("liuhuan90123/EMReliability")
+library(EMReliability)
 
 ### read data
 RCG <- read.csv("TestData/RCG.csv", header = T)

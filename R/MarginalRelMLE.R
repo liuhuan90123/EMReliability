@@ -22,6 +22,7 @@ MarginalRelMLE <- function(itemPara){
   itemParaRep <- within(itemParaRep, {
     P = 0 + (1 - 0) / (1 + exp(-1.701 * a * (theta - b)))
     Q = 1 - P
+    PQ = P * Q
     info = 1.701**2 * a**2 * P * Q
   })
 
