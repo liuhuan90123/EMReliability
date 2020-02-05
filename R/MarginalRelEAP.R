@@ -2,7 +2,9 @@
 
 
 MarginalRelEAP <- function(itemPara){
-
+  if (missing(itemPara)) {
+    stop("You should have itemPara!!")
+  }
   # transform item parameters to the logistic metric
   names(itemPara) <- c("b", "a")
   itemPara[,"a"] <- itemPara[,"a"]/1.701

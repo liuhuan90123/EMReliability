@@ -1,4 +1,4 @@
-#' @title TestRelIRT
+#' @title TestRelIRT is a function
 #'
 #' @description
 #' A function to calculate marginal reliability of 2PL IRT with MLE
@@ -7,7 +7,6 @@
 #' @return a reliability number
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
-#'
 #' @export
 
 TestRelIRT <- function(itemPara){

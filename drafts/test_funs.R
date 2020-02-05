@@ -5,12 +5,10 @@ library(statmod)
 # read item parameters from txt file
 
 itemPara <- read.table("TestData/ItemParaFormX.txt")
-MarginalRelEAP(itemPara)
+### Test Realiability of IRT 2PL
+MarginalRelEAP()
 MarginalRelMLE(itemPara)
 
-### Test Realiability of IRT 2PL
-
-library(statmod)
 #library(classify)
 
 # read item parameters from txt file

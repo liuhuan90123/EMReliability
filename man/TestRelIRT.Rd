@@ -2,7 +2,7 @@
 % Please edit documentation in R/TestRelIRT.R
 \name{TestRelIRT}
 \alias{TestRelIRT}
-\title{TestRelIRT}
+\title{TestRelIRT is a function}
 \usage{
 TestRelIRT(itemPara)
 }
