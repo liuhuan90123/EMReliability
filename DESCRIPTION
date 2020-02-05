@@ -11,5 +11,5 @@ Encoding: UTF-8
 BugReports: https://github.com/liuhuan90123/EMReliability
 Imports:
   statmod
-RoxygenNote: 7.0.2
+RoxygenNote: 6.1.1
 LazyData: true
