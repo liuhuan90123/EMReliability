@@ -3,7 +3,7 @@
 #' @description
 #' A function to calculate marginal reliability of 2PL IRT with EAP
 #'
-#' @param itemPara a text file with parameters of sequence b and a, a is on the 1.7 metric
+#' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
 #' @return a reliability number
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
@@ -15,9 +15,9 @@ MarginalRelEAP <- function(itemPara){
   if (missing(itemPara)) {
     stop("You should have itemPara!!")
   }
-  # transform item parameters to the 1.7 metric
+  # transform item parameters to the 1.702 metric
   names(itemPara) <- c("b", "a")
-  itemPara[,"a"] <- itemPara[,"a"]/1.701
+  itemPara[,"a"] <- itemPara[,"a"]/1.702
 
   # weights and nodes
   quadPoints <- gauss.quad.prob(41, dist = "normal", mu = 0, sigma = 1)
@@ -28,10 +28,10 @@ MarginalRelEAP <- function(itemPara){
 
   # calculate information by theta
   itemParaRep <- within(itemParaRep, {
-    P = 0 + (1 - 0) / (1 + exp(-1.701 * a * (theta - b)))
+    P = 0 + (1 - 0) / (1 + exp(-1.702 * a * (theta - b)))
     Q = 1 - P
     PQ = P * Q
-    info = 1.701**2 * a**2 * P * Q
+    info = 1.702**2 * a**2 * P * Q
   })
 
   # sum information by theta
