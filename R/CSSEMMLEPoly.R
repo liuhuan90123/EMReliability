@@ -56,11 +56,44 @@ CSSEMMLEPoly <- function(itemPara, convTable){
 }
 
 
-CSSEMMLEPoly(itemPara, convTableSub)
+CSSEMMLEPoly(itemPara, convTableSub) ### variable name should be changed
 
 
 
 ### select column without negative values?
+
+### reliability
+
+# rounded scale score reliability; k = 4
+
+cssemMLEPolyDat <- CSSEMMLEPoly(itemPara, convTableSub)
+cssemMLEPolyDat$rawScore <- c(0:40)
+
+
+### raw score frequency
+
+# read raw data
+rawData <- read.table("TestData/RawDataFormX.txt", header = F, sep = " ")
+
+rawFreq <- as.data.frame(table(rowSums(rawData)))
+names(rawFreq) <- c("rawScore", "freq")
+
+
+
+cssemMLEPolyDat <- merge(cssemMLEPolyDat, rawFreq, by = "rawScore")
+
+# weight
+cssemMLEPolyDat$wt <- cssemMLEPolyDat$freq / sum(cssemMLEPolyDat$freq)
+
+library(SDMTools)
+
+MLE <- 1 - sum(cssemMLEPolyDat$cssemPolyk4^2 * cssemMLEPolyDat$wt)/wt.var(cssemMLEPolyDat$roundedSS, cssemMLEPolyDat$wt)
+MLE
+
+
+
+
+
 
 
 

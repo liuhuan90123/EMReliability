@@ -16,7 +16,7 @@ source("R/PolynomialMethod.R")
 
 library(statmod)
 
-CSSEMMLEPoly <- function(itemPara, convTable){
+CSSEMEAPPoly <- function(itemPara, convTable){
 
   # transform item parameters to the 1.702 metric
   names(itemPara) <- c("b", "a")
@@ -59,4 +59,43 @@ CSSEMMLEPoly <- function(itemPara, convTable){
 }
 
 
-CSSEMMLEPoly(itemPara, convTableSub)
+CSSEMEAPPoly(itemPara, convTableSub)
+
+
+
+### select column without negative values?
+
+### reliability
+
+# rounded scale score reliability; k = 4
+
+cssemEAPPolyDat <- CSSEMEAPPoly(itemPara, convTableSub)
+cssemEAPPolyDat$rawScore <- c(0:40)
+
+
+### raw score frequency
+
+# read raw data
+rawData <- read.table("TestData/RawDataFormX.txt", header = F, sep = " ")
+
+rawFreq <- as.data.frame(table(rowSums(rawData)))
+names(rawFreq) <- c("rawScore", "freq")
+
+
+
+cssemEAPPolyDat <- merge(cssemEAPPolyDat, rawFreq, by = "rawScore")
+
+# weight
+cssemEAPPolyDat$wt <- cssemEAPPolyDat$freq / sum(cssemEAPPolyDat$freq)
+
+library(SDMTools)
+
+EAP <- 1 - sum(cssemEAPPolyDat$cssemPolyk4^2 * cssemEAPPolyDat$wt)/wt.var(cssemEAPPolyDat$roundedSS, cssemEAPPolyDat$wt)
+EAP
+
+
+
+
+
+
+
