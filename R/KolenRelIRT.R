@@ -18,8 +18,6 @@ itemPara <- read.table("TestData/ItemParaFormX.txt")
 convTable <- read.csv("TestData/ConversionTableFormX.csv")
 convTable$roundedSS <- round(convTable$unroundedSS)
 
-
-library(statmod)
 library(classify)
 
 
@@ -36,7 +34,7 @@ CSSEMKolen <- function(itemPara, convTable){
   numOfItem <- nrow(itemPara)
 
   # weights and nodes
-  quadPoints <- gauss.quad.prob(numOfQuad, dist = "normal", mu = 0, sigma = 1)
+  quadPoints <- NormalQuadraPoints(41)
 
   # replicate item parameter and theta
   itemParaRep <-itemPara[rep(seq_len(numOfItem), each = numOfQuad),]

@@ -24,8 +24,11 @@ NormalQuadraPoints <- function(n){
   weightsWtd <- weightsUnwtd / sum(weightsUnwtd)
 
   # return nodes and normalized weights
-  return(list(nodes, weightsWtd))
+  return(list("nodes" = nodes, "weights" = weightsWtd))
 
 }
 
-NormalQuadraPoints(41)
+
+
+
+

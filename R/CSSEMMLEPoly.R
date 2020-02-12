@@ -20,7 +20,7 @@ CSSEMMLEPoly <- function(itemPara, convTable, K){
   itemPara[,"a"] <- itemPara[,"a"]/1.702
 
   # weights and nodes
-  quadPoints <- gauss.quad.prob(41, dist = "normal", mu = 0, sigma = 1)
+  quadPoints <- NormalQuadraPoints(41)
 
   # replace nodes with theta score in coversion table
   quadPoints$nodes <- convTable$thetaScore
