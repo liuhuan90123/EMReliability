@@ -1,0 +1,4 @@
+useDynLib(classify)
+exportPattern("^[[:alpha:]]+")
+import(ggplot2,plyr,Rcpp,lattice,methods,R2jags)
+importFrom(reshape2,melt)

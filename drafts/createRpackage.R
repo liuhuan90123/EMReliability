@@ -24,3 +24,12 @@ library(ReliabilityTest)
 
 
 install_github('ReliabilityTest','github_username')
+
+
+install_github("liuhuan90123/EMReliability")
+
+library(EMReliability)
+lsf.str(EMReliability)
+
+CronbachAlpha
+
