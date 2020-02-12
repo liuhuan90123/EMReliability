@@ -54,11 +54,13 @@ CSSEMMLEPoly <- function(itemPara, convTable, K){
 
 }
 
+
+
 K <- 20
 
 CSSEMMLEPoly(itemPara, convTableSub, K) ### variable name should be changed
 
-
+# names(CSSEMMLEPoly(itemPara, convTableSub, K)$`CSSEM Polynomial Method`)
 
 ### select column without negative values?
 
@@ -66,7 +68,7 @@ CSSEMMLEPoly(itemPara, convTableSub, K) ### variable name should be changed
 
 # rounded scale score reliability; k = 4
 
-cssemMLEPolyDat <- CSSEMMLEPoly(itemPara, convTableSub, K)
+cssemMLEPolyDat <- CSSEMMLEPoly(itemPara, convTableSub, K)$`CSSEM Polynomial Method`
 cssemMLEPolyDat$rawScore <- c(0:40)
 
 

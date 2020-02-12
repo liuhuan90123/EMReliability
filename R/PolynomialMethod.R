@@ -58,9 +58,7 @@ PolynomialMethod <- function(cssemDat, K){
 
   }
 
-  print("R Squared summary")
-  print(as.data.frame(rSquaredDat[1:k,]))
-  print("CSSEM Polynomial Method")
-  cssemDat
+  return(list("R Squared summary" = as.data.frame(rSquaredDat[1:k,]),
+         "CSSEM Polynomial Method" = cssemDat))
 
 }
