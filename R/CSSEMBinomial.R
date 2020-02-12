@@ -1,9 +1,16 @@
-### CSSEM Binomial Method
-
-# read conversion table from cvs file
-convTable <- read.csv("TestData/ConversionTableFormX.csv")
-convTable$roundedSS <- round(convTable$unroundedSS)
-convTableSub <- convTable[,c("rawScore", "roundedSS")]
+#' @title CSSEM Binomial Method
+#'
+#' @description
+#' A function to calculate Conditional Standard Error of Measurement for Scale Scores in CTT
+#'
+#' @param numOfItem a numeric number indicating number of items
+#' @param convTable a data frame or matrix containing conversion table of raw score to scale score
+#'
+#' @return a data frame containing CSSEM using Binomial Method
+#'
+#' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
+#'
+#' @export
 
 
 CSSEMBinomial <- function(numOfItem, convTable){
@@ -47,8 +54,5 @@ CSSEMBinomial <- function(numOfItem, convTable){
   return(cssemDat)
 
 }
-
-
-CSSEMBinomial(40, convTableSub)
 
 

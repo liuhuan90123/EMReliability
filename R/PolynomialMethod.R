@@ -1,8 +1,20 @@
-### CSSEM Polynomial Method
+#' @title Polynomial Method for CSSEM
+#'
+#' @description
+#' A function to implement polynomial method in calculating CSSEM
+#'
+#' @param cssemDat a ata frame or matrix containing conversion table of raw score to scale score, and csem of raw score
+#' @param K degree of polynomial regression
+#'
+#' @return a data frame containing CSSEM using Polynomial Method using different k values
+#'
+#' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
+#'
+#' @export
 
 PolynomialMethod <- function(cssemDat, K){
 
-
+  # create data frame to store r square
   rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
 
   # for loop to iterate different k
@@ -10,14 +22,16 @@ PolynomialMethod <- function(cssemDat, K){
 
     # k <- 9
 
-    # fit model with k and get coefficients
+    # fit model with k
     modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
-    regCoef <- summary(modelK)$coefficients[, 1]
-    regCoef
 
+    # extract regression coefficients
+    regCoef <- summary(modelK)$coefficients[, 1]
+
+    # extract r square coefficient
     rSquaredDat[k, 1]<- summary(modelK)$r.squared
 
-
+    # check whether regression coefficient of highest order is missing
     if(is.na(regCoef[k+1])){
       warning(paste("The maximum k accepted is", k-1, sep = " "))
       break
@@ -39,6 +53,7 @@ PolynomialMethod <- function(cssemDat, K){
     # calculate cssem using polynomial method
     cssemDat$cssemPoly <- cssemDat$fx * cssemDat$csemLord
 
+    # rename variable with indicator k
     names(cssemDat)[names(cssemDat) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
 
   }
@@ -46,7 +61,6 @@ PolynomialMethod <- function(cssemDat, K){
   print("R Squared summary")
   print(as.data.frame(rSquaredDat[1:k,]))
   print("CSSEM Polynomial Method")
-  print(cssemDat)
-
+  cssemDat
 
 }

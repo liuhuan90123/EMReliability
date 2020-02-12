@@ -1,5 +1,14 @@
-### CSEM Lord Mehtod
-
+#' @title CSEM Lord Mehtod
+#'
+#' @description
+#' A function to calculate Conditional Standard Error of Measurement in CTT
+#'
+#' @param numOfItem a numeric number indicating number of items
+#' @return a data frame containing Lord CSEM
+#'
+#' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
+#'
+#' @export
 
 
 CSEMLord <- function(numOfItem){

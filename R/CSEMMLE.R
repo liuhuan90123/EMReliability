@@ -1,27 +1,28 @@
-#' @title Marginal Reliability of IRT 2PL: MLE
+#' @title CSEM of IRT 2PL: MLE
 #'
 #' @description
-#' A function to calculate marginal reliability of 2PL IRT with MLE
+#' A function to calculate CSEM of 2PL IRT with MLE
 #'
 #' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
-#' @return a reliability number
+#' @param theta a vector, matrix, or data frame containing theta values
+#' @return a data frame containing IRT MLE CSEM
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
 #'
 #' @export
 
-MarginalRelMLE <- function(itemPara){
+CSEMMLE <- function(itemPara, theta){
 
   # transform item parameters to the 1.702 metric
   names(itemPara) <- c("b", "a")
   itemPara[,"a"] <- itemPara[,"a"]/1.702
 
   # weights and nodes
-  quadPoints <- gauss.quad.prob(41, dist = "normal", mu = 0, sigma = 1)
+  # quadPoints <- gauss.quad.prob(41, dist = "normal", mu = 0, sigma = 1)
 
   # replicate item parameter and theta
-  itemParaRep <-itemPara[rep(seq_len(nrow(itemPara)), each = 41),]
-  itemParaRep$theta <- rep(quadPoints$nodes, each = 1, length.out = 41*nrow(itemPara))
+  itemParaRep <-itemPara[rep(seq_len(nrow(itemPara)), each = length(theta)),]
+  itemParaRep$theta <- rep(theta, each = 1, length.out = length(theta)*nrow(itemPara))
 
   # calculate information by theta
   itemParaRep <- within(itemParaRep, {
@@ -35,17 +36,10 @@ MarginalRelMLE <- function(itemPara){
   itemParaInfo <- aggregate(itemParaRep$info, by=list(Category=itemParaRep$theta), FUN=sum)
   names(itemParaInfo) <- c("theta", "infoSum")
 
-  # add weights for each theta
-  itemParaInfo$weights <- quadPoints$weights
+  # calculate CSEM for each theta
+  itemParaInfo$csemMLE <- sqrt(1/itemParaInfo$infoSum)
 
-  ## MLE method
-
-  # weighted information
-  itemParaInfo$infoWeighted <- itemParaInfo$weights * itemParaInfo$infoSum
-
-  # marginal reliability MLE
-  marginalRelMLE <- sum(itemParaInfo$infoWeighted)/(sum(itemParaInfo$infoWeighted) + 1)
-  marginalRelMLE
+  itemParaInfo
 
 }
 

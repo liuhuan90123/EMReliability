@@ -1,4 +1,13 @@
 #' @title Feldt
+#'
+#' @description
+#' A function to calculate Feldt reliability in CTT
+#'
+#' @param dat a data frame or matrix containing raw data
+#' @return a reliability number
+#'
+#' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
+#'
 #' @export
 
 Feldt <- function(dat){
