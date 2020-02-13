@@ -21,7 +21,7 @@ convTable$roundedSS <- round(convTable$unroundedSS)
 library(classify)
 
 
-CSSEMKolen <- function(itemPara, convTable){
+KolenRelIRT <- function(itemPara, convTable){
 
   # transform item parameters to the 1.702 metric
   names(itemPara) <- c("b", "a")

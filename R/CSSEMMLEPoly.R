@@ -2,14 +2,17 @@
 
 
 # read item parameter
-itemPara <- read.table("TestData/ItemParaFormX.txt")
+itemPara <- read.table("TestData/ItemParaFormY.txt")
 
 # read conversion table from cvs file
-convTable <- read.csv("TestData/ConversionTableFormX.csv")
+convTable <- read.csv("TestData/ConversionTableFormY.csv")
 convTable$roundedSS <- round(convTable$unroundedSS)
 convTableSub <- convTable[,c("thetaScore", "roundedSS")]
 
 source("R/PolynomialMethod.R")
+source("R/NormalQuadraPoints.R")
+
+
 
 library(statmod)
 
@@ -75,7 +78,7 @@ cssemMLEPolyDat$rawScore <- c(0:40)
 ### raw score frequency
 
 # read raw data
-rawData <- read.table("TestData/RawDataFormX.txt", header = F, sep = " ")
+rawData <- read.table("TestData/RawDataFormY.txt", header = F, sep = " ")
 
 rawFreq <- as.data.frame(table(rowSums(rawData)))
 names(rawFreq) <- c("rawScore", "freq")
