@@ -7,9 +7,12 @@
 library(devtools)
 library(roxygen2)
 library(root)
-install.packages("root")
+# install.packages("root")
 
 devtools::document()
+
+
+
 
 #1
 setwd("C:\\Users\\Huan\\OneDrive - University of Iowa\\")

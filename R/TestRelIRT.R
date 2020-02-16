@@ -18,14 +18,14 @@ TestRelIRT <- function(itemPara){
   numOfItem <- nrow(itemPara)
 
   # num of quadratures
-  numQuad <- 41
+  numOfQuad <- 41
 
   # weights and nodes
-  quadPoints <- NormalQuadraPoints(numQuad)
+  quadPoints <- NormalQuadraPoints(numOfQuad)
 
   # replicate item parameter and theta
-  itemParaRep <-itemPara[rep(seq_len(numOfItem), each = numQuad),]
-  itemParaRep$theta <- rep(quadPoints$nodes, each = 1, length.out = numQuad*numOfItem)
+  itemParaRep <-itemPara[rep(seq_len(numOfItem), each = numOfQuad),]
+  itemParaRep$theta <- rep(quadPoints$nodes, each = 1, length.out = numOfQuad*numOfItem)
 
   # calculate information by theta
   itemParaRep <- within(itemParaRep, {
@@ -59,7 +59,7 @@ TestRelIRT <- function(itemPara){
   itemParaRep <- itemParaRep[order(itemParaRep$theta),]
 
   # define matrix of marginal distribution of theta
-  fxTheta <- matrix(NA, nrow = numQuad, ncol = numOfItem + 1) # 41 num of quadratures, 41 num of raw sxores
+  fxTheta <- matrix(NA, nrow = numOfQuad, ncol = numOfItem + 1) # 41 num of quadratures, 41 num of raw sxores
 
   # for loop to calculate fxTheta
   for (i in 1:numOfQuad){

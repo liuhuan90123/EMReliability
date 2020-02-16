@@ -1,42 +1,33 @@
 
 ### Results for project ------------------
 
+# source("R/NormalQuadraPoints.R") # n set as 41
+# source("R/Info.R")
+# source("R/LordWingersky.R")
+# source("R/CronbachAlpha.R") # raw data
+# source("R/Feldt.R")
+# source("R/MarginalRelMLE.R") # itemPara
+# source("R/MarginalRelEAP.R") # itemPara
+# source("R/TestRelIRT.R") # itemPara
+# source("R/KolenRelIRT.R") # itemPara, convTable
+# source("R/CSEMLord.R") # numer of item
+# source("R/PolynomialMethod.R") # cssemDat, K=num of degree
+# source("R/CSSEMPolynomial.R") # numOfItem, convTable, K
+# source("R/CSEMLord.R") # number of item
+# source("R/CSSEMMLEPoly.R") # itemPara, convTable, K
+# source("R/CSSEMEAPPoly.R") # itemPara, convTable, K
+# source("R/CSEMLord.R") # numer of item
+# source("R/CSSEMBinomial.R") # numer of item
+# source("R/CSSEMPolynomial.R") # numOfItem, convTable, K
+# source("R/CSEMIRT.R") # itemPara
+# source("R/CSSEMIRT.R") # itemPara, convTable
 
-## IRT Test Reliability
-# help functions
-source("R/NormalQuadraPoints.R") # n set as 41
-
-NormalQuadraPoints(41)
-
-source("R/Info.R")
-
-Info(NormalQuadraPoints(41)$nodes, itemPara_A, "MLE")
-
-source("R/LordWingersky.R")
-
-LordWingersky(c(0.9,0.9,0.9))
-
-
-source("R/CronbachAlpha.R") # raw data
-source("R/Feldt.R")
-
-source("R/MarginalRelMLE.R") # itemPara
-source("R/MarginalRelEAP.R") # itemPara
-source("R/TestRelIRT.R") # itemPara
-
-
-source("R/KolenRelIRT.R") # itemPara, convTable
-source("R/CSEMLord.R") # numer of item
-source("R/PolynomialMethod.R") # cssemDat, K=num of degree
-source("R/CSSEMPolynomial.R") # numOfItem, convTable, K
-source("R/CSEMLord.R") # number of item
-source("R/CSSEMMLEPoly.R") # itemPara, convTable, K
-source("R/CSSEMEAPPoly.R") # itemPara, convTable, K
+# load library
+library(EMReliability)
 
 # read raw data
 rawData_A <- read.table("TestData/RawDataFormX.txt")
 rawData_B <- read.table("TestData/RawDataFormY.txt")
-
 
 # read item parameters from txt file
 itemPara_A <- read.table("TestData/ItemParaFormX.txt")
@@ -53,8 +44,16 @@ convTable_A$roundedSS <- round(convTable_A$unroundedSS)
 convTable_B <- read.csv("TestData/ConversionTableFormY.csv")
 convTable_B$roundedSS <- round(convTable_B$unroundedSS)
 
-# CronbachAlpha
+convTable_A_Poly <- convTable_A[,c("theta", "roundedSS")]
+convTable_B_Poly <- convTable_B[,c("theta", "roundedSS")]
 
+
+# test help functions ------------------------------------
+NormalQuadraPoints(41)
+LordWingersky(c(0.9,0.9,0.9))
+Info(NormalQuadraPoints(41)$nodes, itemPara_A, "EAP")
+
+# CronbachAlpha & GT
 CronbachAlpha_A <- CronbachAlpha(rawData_A)
 CronbachAlpha_A
 
@@ -62,7 +61,6 @@ CronbachAlpha_B <- CronbachAlpha(rawData_B)
 CronbachAlpha_B
 
 # Feldt
-
 Feldt_A <- Feldt(rawData_A)
 Feldt_A
 
@@ -91,117 +89,105 @@ MarginalRelEAP_B <- MarginalRelIRT(itemPara_B, "EAP")
 MarginalRelEAP_B
 
 # Kolen's method
-
 KolenRelIRT_A <- KolenRelIRT(itemPara_A, convTable_A)
 KolenRelIRT_A
 
 KolenRelIRT_B <- KolenRelIRT(itemPara_B, convTable_B)
 KolenRelIRT_B
 
+# Reliability for rounded SS using polynomial method
+RelMLEPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE", rawData_A)
+RelMLEPoly_A
+RelMLEPoly_B <- RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE", rawData_B)
+RelMLEPoly_B
+
+RelEAPPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP", rawData_A)
+RelEAPPoly_A
+RelEAPPoly_B <- RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP", rawData_B)
+RelEAPPoly_B
+
+### CSEM --------------------------------------------------------------
+
 # CSEM Lord
-source("R/CSEMLord.R") # numer of item
 csemLord <- CSEMLord(40)
+csemLord
 
+# CSEM MLE
+csemMLE_A <- CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_A, "MLE")
+csemMLE_A
+csemMLE_B <- CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_B, "MLE")
+csemMLE_B
+
+# CSEM EAP
+csemEAP_A <- CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_A, "EAP")
+csemEAP_A
+csemEAP_B <- CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_B, "EAP")
+csemEAP_B
+
+### CSSEM -------------------------------------------------------------
 # CSSEM Binomial
-source("R/CSSEMBinomial.R") # numer of item
-csemBinomial <- CSSEMBinomial(40, convTable_A)
+csemBinomial_A <- CSSEMBinomial(40, convTable_A)
+csemBinomial_A
+csemBinomial_B <- CSSEMBinomial(40, convTable_B)
+csemBinomial_B
 
+# CSSEM Polynomial
 
-# CSSEMPolynomial
-
-source("R/CSSEMPolynomial.R") # numOfItem, convTable, K
-
-# Note: 1. cssemDat should include rawScore, roundedSS, and Lordcsem
-#       2. conversion table should include raw score and rounded scale score
 # number of item
 numOfItem <- 40
 
 convTable_A_sub <- convTable_A[,c("rawScore", "roundedSS")]
 convTable_B_sub <- convTable_B[,c("rawScore", "roundedSS")]
 
-CSSEMPolynomial(numOfItem, convTable_A_sub, 15)
-CSSEMPolynomial(numOfItem, convTable_B_sub, 15)
+cssemPolynomial_A <- CSSEMPolynomial(numOfItem, convTable_A_sub, 20)
+cssemPolynomial_A
+cssemPolynomial_B <- CSSEMPolynomial(numOfItem, convTable_B_sub, 20)
+cssemPolynomial_B
+
+# CSSEM Kolen's Method
+cssemKolen_A <- CSSEMKolen(itemPara_A, convTable_A)
+cssemKolen_A
+cssemKolen_B <- CSSEMKolen(itemPara_B, convTable_B)
+cssemKolen_B
+
+# CSSEM IRT MLE Polynomial
+
+cssemMLEPoly_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")
+cssemMLEPoly_A
+cssemMLEPoly_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")
+cssemMLEPoly_B
+
+# CSSEM IRT EAP Polynomial
+
+cssemEAPPoly_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP")
+cssemEAPPoly_A
+cssemEAPPoly_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")
+cssemEAPPoly_B
 
 
 
-# CSSEMMLEPoly (change csemLord)
-
-CSSEMMLEPoly(itemPara_A, convTable_A, 20)
-CSSEMMLEPoly(itemPara_B, convTable_B, 20)
-
-# CSSEMEAPPoly (change csemLord)
-
-CSSEMEAPPoly(itemPara_A, convTable_A, 20)
-CSSEMEAPPoly(itemPara_B, convTable_B, 20)
 
 
-
-source("R/CSEMIRT.R") # itemPara
-
-
-# CSEM IRT MLE&EAP
-CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_A, "MLE")
-
-CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_B, "EAP")
-
-
-source("R/CSSEMIRT.R") # itemPara, convTable
-
-CSSEMKolen(itemPara_A, convTable_A)
-
-CSSEMKolen(itemPara_B, convTable_B)
-
-
-##
-
-convTable_A_Poly <- convTable_A[,c("theta", "roundedSS")]
-convTable_B_Poly <- convTable_B[,c("theta", "roundedSS")]
-
-
-
-CSSEMIRTPoly(itemPara, convTable_A_Poly, K, "EAP")
-
-CSSEMIRTPoly(itemPara, convTable_A_Poly, K, "MLE")
-
-
-
-### realiability for scale score
-
-
-RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE", rawData_A)
-RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE", rawData_B)
-
-RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP", rawData_A)
-RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP", rawData_B)
 
 ### Plot function
-
+library(ggplot2)
 
 ### Plot Kolen CSSEM  ---------------------------------------------------------------------------
-cssemKolen <- as.data.frame(cssemKolen)
-
-
-### true scale score ---------
-
-cssemKolen$trueSS <- colSums(fxThetaTSS)[1:41]
-
-names(cssemKolen) <- c("cssemKolen", "trueSS")
+cssemKolen_A <- as.data.frame(cssemKolen_A)
+plot(cssemKolen_A$trueScaleScore, cssemKolen_A$cssemKolen)
 
 png("CSSEM_KolenIRT_A.png",  width = 799, height = 596)
 
-library(ggplot2)
-
-K <- ggplot(cssemKolen, aes(x = trueSS, y = cssemKolen)) +
+KA <- ggplot(cssemKolen_A, aes(x = trueScaleScore, y = cssemKolen)) +
   geom_point(size = 2) +
-  scale_x_continuous(name = "True Scale Score", breaks  = seq(100,  130, 5)) +
-  scale_y_continuous(name = "CSSEM_Kolen IRT Method") +
+  scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
   theme_bw()
 
-print(K)
+print(KA)
 dev.off()
 
-
-write.csv(cssemKolen, "cssemKolen.csv")
 
 
 ### plot CSSEM Polynomial ---------------------------------------------------------------------------
