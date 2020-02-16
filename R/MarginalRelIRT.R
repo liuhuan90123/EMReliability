@@ -4,14 +4,14 @@
 #' A function to calculate marginal reliability of 2PL IRT with MLE&EAP
 #'
 #' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
-#' @param estimation method, MLE or EAP
+#' @param estType estimation method, MLE or EAP
 #' @return a reliability number
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
 #'
 #' @export
 
-MarginalRelIRT <- function(itemPara, estType = "MLE"){
+MarginalRelIRT <- function(itemPara, estType){
 
   # weights and nodes
   quadPoints <- NormalQuadraPoints(41)

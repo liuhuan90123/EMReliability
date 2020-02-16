@@ -4,7 +4,6 @@
 #' A function to calculate IRT Reliability of Kolen's Method
 #'
 #' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
-#'
 #' @param convTable matrix or data frame contains raw score to scale score
 #' @return a reliability number
 #'

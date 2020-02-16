@@ -7,9 +7,9 @@
 library(devtools)
 library(roxygen2)
 
-
-setwd("C:/Users/Huan/OneDrive - University of Iowa/EM5_Huan/RelTest")
-create("ReliabilityTest")
+#1
+setwd("C:\\Users\\Huan\\OneDrive - University of Iowa\\")
+create("EMRel")
 
 setwd("./ReliabilityTest")
 document()
