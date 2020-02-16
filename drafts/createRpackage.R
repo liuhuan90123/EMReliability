@@ -6,6 +6,10 @@
 
 library(devtools)
 library(roxygen2)
+install.packages("root")
+library(root)
+
+devtools::document()
 
 #1
 setwd("C:\\Users\\Huan\\OneDrive - University of Iowa\\")
@@ -32,4 +36,9 @@ library(EMReliability)
 lsf.str(EMReliability)
 
 CronbachAlpha
+
+
+
+
+
 
