@@ -172,6 +172,10 @@ cssemEAPPoly_B
 ### Plot function
 library(ggplot2)
 
+# plot CSEM Lord
+
+plot(csemLord$rawScore, csemLord$csemLord)
+
 ### Plot Kolen CSSEM  ---------------------------------------------------------------------------
 cssemKolen_A <- as.data.frame(cssemKolen_A)
 plot(cssemKolen_A$trueScaleScore, cssemKolen_A$cssemKolen)
