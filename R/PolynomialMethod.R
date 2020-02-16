@@ -20,8 +20,6 @@ PolynomialMethod <- function(cssemDat, K){
   # for loop to iterate different k
   for (k in 1:K){
 
-    # k <- 9
-
     # fit model with k
     modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
 
@@ -33,8 +31,11 @@ PolynomialMethod <- function(cssemDat, K){
 
     # check whether regression coefficient of highest order is missing
     if(is.na(regCoef[k+1])){
+
       warning(paste("The maximum k accepted is", k-1, sep = " "))
+
       break
+
     }
 
     # calculate transformation coefficients fx: from 1 to K
@@ -51,14 +52,19 @@ PolynomialMethod <- function(cssemDat, K){
     cssemDat$fx <- cssemDat$fx + regCoef[i+1]
 
     # calculate cssem using polynomial method
-    cssemDat$cssemPoly <- cssemDat$fx * cssemDat$csemLord
+    cssemDat$cssemPoly <- cssemDat$fx * cssemDat$csem
 
     # rename variable with indicator k
     names(cssemDat)[names(cssemDat) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
 
   }
 
-  return(list("R Squared summary" = as.data.frame(rSquaredDat[1:k,]),
-         "CSSEM Polynomial Method" = cssemDat))
+  return(list("RSquared" = as.matrix(rSquaredDat[1:k,]), "CSSEMPoly" = cssemDat))
 
 }
+
+
+
+
+
+

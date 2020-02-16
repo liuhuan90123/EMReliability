@@ -67,15 +67,16 @@ CSSEMKolen <- function(itemPara, convTable){
   # for loop to calculate fxTheta
   for (i in 1:numOfQuad){
 
-    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P,
-                      itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$Q),
-                    nrow = numOfItem, ncol = 2, byrow = FALSE)
+    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P),
+                    nrow = numOfItem, ncol = 1, byrow = FALSE)
 
-    cats <- c(rep(2, numOfItem))
+    # cats <- c(rep(2, numOfItem))
 
-    fxTheta[i, ] <- wlord(probs,cats)
+    fxTheta[i, ] <- LordWingersky(probs)
 
   }
+
+  fxTheta <- fxTheta[, c(ncol(fxTheta):1)]
 
   # transform to data frame
   fxTheta <- as.data.frame(fxTheta)

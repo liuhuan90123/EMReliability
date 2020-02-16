@@ -13,23 +13,27 @@ TestRelIRT <- function(itemPara){
 
   # transform item parameters to the logistic metric
   names(itemPara) <- c("b", "a")
-  itemPara[,"a"] <- itemPara[,"a"]/1.701
+
+  # num of items
+  numOfItem <- nrow(itemPara)
+
+  # num of quadratures
+  numQuad <- 41
 
   # weights and nodes
-  quadPoints <- NormalQuadraPoints(41)
+  quadPoints <- NormalQuadraPoints(numQuad)
 
   # replicate item parameter and theta
-  itemParaRep <-itemPara[rep(seq_len(nrow(itemPara)), each = 41),]
-  itemParaRep$theta <- rep(quadPoints$nodes, each = 1, length.out = 41*nrow(itemPara))
+  itemParaRep <-itemPara[rep(seq_len(numOfItem), each = numQuad),]
+  itemParaRep$theta <- rep(quadPoints$nodes, each = 1, length.out = numQuad*numOfItem)
 
   # calculate information by theta
   itemParaRep <- within(itemParaRep, {
-    P = 0 + (1 - 0) / (1 + exp(-1.701 * a * (theta - b)))
+    P = 0 + (1 - 0) / (1 + exp(-1.702 * a * (theta - b)))
     Q = 1 - P
     PQ = P * Q
-    info = 1.701**2 * a**2 * P * Q
+    info = 1.702**2 * a**2 * P * Q
   })
-
 
   ## true score variance
 
@@ -54,22 +58,21 @@ TestRelIRT <- function(itemPara){
   # order by theta
   itemParaRep <- itemParaRep[order(itemParaRep$theta),]
 
-  # num of quadratures
-  numQuad <- 41
-
   # define matrix of marginal distribution of theta
-  fxTheta <- matrix(NA, nrow = numQuad, ncol = 41) # 41 num of quadratures, 41 num of raw sxores
+  fxTheta <- matrix(NA, nrow = numQuad, ncol = numOfItem + 1) # 41 num of quadratures, 41 num of raw sxores
 
-  # calculate marginal distribution of theta
-  for (i in 1:numQuad){
+  # for loop to calculate fxTheta
+  for (i in 1:numOfQuad){
 
-    probs <- matrix(c(itemParaRep[(1 + 40 * (i - 1)):(40 * i),]$P,
-                      itemParaRep[(1 + 40 * (i - 1)):(40 * i),]$Q),
-                    nrow = 40, ncol = 2, byrow = FALSE)
-    cats <- c(rep(2, 40))
-    fxTheta[i, ] <- wlord(probs,cats)
+    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P),
+                    nrow = numOfItem, ncol = 1, byrow = FALSE)
+
+    fxTheta[i, ] <- LordWingersky(probs)$probability
 
   }
+
+  # reverse column sequence
+  fxTheta <- fxTheta[, c(ncol(fxTheta):1)]
 
   # transform to data frame
   fxTheta <- as.data.frame(fxTheta)
@@ -82,7 +85,7 @@ TestRelIRT <- function(itemPara){
 
   # sum weighted distribution
   fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:41]), nrow = 41, ncol = 1))
-  fxDist$X <- c(nrow(itemPara):0)
+  fxDist$X <- c(numOfItem:0)
   names(fxDist) <- c("wts", "X")
 
   # weighted mean of Obs X
@@ -91,10 +94,11 @@ TestRelIRT <- function(itemPara){
   # variance of Obs X
   varianceObsX <- sum(fxDist$wts * (fxDist$X - weightedMean)^2)
 
-  # test reliability formula
-
+  # test reliability
   TestRelIRT <- 1 - varianceError / varianceObsX # varianceTrue / varianceObsX
-  TestRelIRT
+
+  # return coefficient
+  return(TestRelIRT)
 }
 
 

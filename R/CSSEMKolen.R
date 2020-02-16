@@ -13,23 +13,11 @@
 #'
 #' @export
 
-# read item parameters from txt file
-itemPara <- read.table("TestData/ItemParaFormX.txt")
-
-# read conversion table
-convTable <- read.csv("TestData/ConversionTableFormX.csv")
-convTable$roundedSS <- round(convTable$unroundedSS)
-
-
-library(statmod)
-library(classify)
-
 
 CSSEMKolen <- function(itemPara, convTable){
 
-  # transform item parameters to the 1.702 metric
+  # item parameters on the 1.702 metric
   names(itemPara) <- c("b", "a")
-  itemPara[,"a"] <- itemPara[,"a"]/1.702
 
   # number of quadrature
   numOfQuad <- 41
@@ -38,7 +26,7 @@ CSSEMKolen <- function(itemPara, convTable){
   numOfItem <- nrow(itemPara)
 
   # weights and nodes
-  quadPoints <- NormalQuadraPoints(41)
+  quadPoints <- NormalQuadraPoints(numOfQuad)
 
   # replicate item parameter and theta
   itemParaRep <-itemPara[rep(seq_len(numOfItem), each = numOfQuad),]
@@ -61,15 +49,15 @@ CSSEMKolen <- function(itemPara, convTable){
   # for loop to calculate fxTheta
   for (i in 1:numOfQuad){
 
-    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P,
-                      itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$Q),
-                      nrow = numOfItem, ncol = 2, byrow = FALSE)
+    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P),
+                    nrow = numOfItem, ncol = 1, byrow = FALSE)
 
-    cats <- c(rep(2, numOfItem))
-
-    fxTheta[i, ] <- wlord(probs,cats)
+    fxTheta[i, ] <- LordWingersky(probs)$probability
 
   }
+
+  # reverse column sequence
+  fxTheta <- fxTheta[, c(ncol(fxTheta):1)]
 
   # transform to data frame
   fxTheta <- as.data.frame(fxTheta)
@@ -88,7 +76,7 @@ CSSEMKolen <- function(itemPara, convTable){
   fxThetaTSS <- rbind(fxThetaT, colSums(fxThetaTSS))
 
   # CSSEM condtional on theta
-  cssemKolen <- matrix(NA,nrow = 41, ncol = 1)
+  cssemKolen <- matrix(NA, nrow = 41, ncol = 1)
 
   for (i in 1:41){
 
@@ -96,52 +84,14 @@ CSSEMKolen <- function(itemPara, convTable){
 
   }
 
-  # error variance: avarage CSSEM across theta distribution
-  errorVarKolen <- sum(cssemKolen^2 * quadPoints$weights)
+  # true scale score
+  trueSS <- colSums(fxThetaTSS)[1:41]
 
-  # variance of scale score
-  fxPrXi <- as.data.frame(apply(fxTheta[c(1:41)], 2, function(x) x * quadPoints$weights))
-
-  # mean of scale score
-  meanSS <- sum(rev(convTable$roundedSS) * colSums(fxPrXi))
-
-  # variance of scale score
-  SSVarKolen <- sum((rev(convTable$roundedSS) - meanSS)^2 * colSums(fxPrXi))
-
-  # reliability
-  RelIRTSSKolen <- 1 - errorVarKolen / SSVarKolen
-  RelIRTSSKolen
+  return(list("trueScaleScore" = as.numeric(trueSS), "cssemKolen" = as.numeric(cssemKolen)))
 
 }
 
 
-CSSEMKolen(itemPara, convTable)
 
-
-### Plot ------------------------------------------------------------------
-cssemKolen <- as.data.frame(cssemKolen)
-
-
-### true scale score ---------
-
-cssemKolen$trueSS <- colSums(fxThetaTSS)[1:41]
-
-names(cssemKolen) <- c("cssemKolen", "trueSS")
-
-png("CSSEM_KolenIRT_A.png",  width = 799, height = 596)
-
-library(ggplot2)
-
-K <- ggplot(cssemKolen, aes(x = trueSS, y = cssemKolen)) +
-  geom_point(size = 2) +
-  scale_x_continuous(name = "True Scale Score", breaks  = seq(100,  130, 5)) +
-  scale_y_continuous(name = "CSSEM_Kolen IRT Method") +
-  theme_bw()
-
-print(K)
-dev.off()
-
-
-write.csv(cssemKolen, "cssemKolen.csv")
 
 

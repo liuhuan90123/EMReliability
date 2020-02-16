@@ -4,7 +4,8 @@
 #' A function to calculate Conditional Standard Error of Measurement for Scale Scores in CTT
 #'
 #' @param numOfItem a numeric number indicating number of items
-#' @param convTable a data frame or matrix containing conversion table of raw score to scale score
+#' @param convTable a data frame or matrix containing conversion table of raw score to scale score: variable name
+#'                  should be rawScore & roundedSS
 #'
 #' @return a data frame containing CSSEM using Binomial Method
 #'
@@ -17,7 +18,6 @@ CSSEMBinomial <- function(numOfItem, convTable){
 
   # create matrix to store csem
   cssemDat <- matrix(nrow = numOfItem + 1, ncol = 1)
-
 
   # for loop to calculate prob for each true score
   for (i in 0:numOfItem){
@@ -45,13 +45,8 @@ CSSEMBinomial <- function(numOfItem, convTable){
 
   }
 
-  # format csem data frame
-  cssemDat <- as.data.frame(cssemDat)
-  names(cssemDat) <- c("cssemBinomial")
-  cssemDat$rawScore <- c(0:numOfItem)
-
-  # return Lord csem
-  return(cssemDat)
+  # return raw score and Binomial csem
+  return(list("roundedSS" = convTable$roundedSS, "cssemBinomial" = as.numeric(cssemDat)))
 
 }
 

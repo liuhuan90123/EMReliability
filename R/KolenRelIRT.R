@@ -4,6 +4,7 @@
 #' A function to calculate IRT Reliability of Kolen's Method
 #'
 #' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
+#'
 #' @param convTable matrix or data frame contains raw score to scale score
 #' @return a reliability number
 #'
@@ -11,21 +12,11 @@
 #'
 #' @export
 
-# read item parameters from txt file
-itemPara <- read.table("TestData/ItemParaFormX.txt")
-
-# read conversion table
-convTable <- read.csv("TestData/ConversionTableFormX.csv")
-convTable$roundedSS <- round(convTable$unroundedSS)
-
-library(classify)
-
 
 KolenRelIRT <- function(itemPara, convTable){
 
   # transform item parameters to the 1.702 metric
   names(itemPara) <- c("b", "a")
-  itemPara[,"a"] <- itemPara[,"a"]/1.702
 
   # number of quadrature
   numOfQuad <- 41
@@ -57,15 +48,15 @@ KolenRelIRT <- function(itemPara, convTable){
   # for loop to calculate fxTheta
   for (i in 1:numOfQuad){
 
-    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P,
-                      itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$Q),
-                    nrow = numOfItem, ncol = 2, byrow = FALSE)
+    probs <- matrix(c(itemParaRep[(1 + numOfItem * (i - 1)):(numOfItem * i),]$P),
+                    nrow = numOfItem, ncol = 1, byrow = FALSE)
 
-    cats <- c(rep(2, numOfItem))
-
-    fxTheta[i, ] <- wlord(probs,cats)
+    fxTheta[i, ] <- LordWingersky(probs)$probability
 
   }
+
+  # reverse column sequence
+  fxTheta <- fxTheta[, c(ncol(fxTheta):1)]
 
   # transform to data frame
   fxTheta <- as.data.frame(fxTheta)
@@ -106,6 +97,7 @@ KolenRelIRT <- function(itemPara, convTable){
 
   # reliability
   kolenRelIRT <- 1 - errorVarKolen / SSVarKolen
-  kolenRelIRT
+
+  return(kolenRelIRT)
 
 }

@@ -23,6 +23,7 @@ CronbachAlpha <- function(dat){
   varianceTotal <- sum(cov(dat))
 
   cronbachAlpha <- numColumn / (numColumn - 1) * (varianceTotal - varianceItemSum)/varianceTotal
-  cronbachAlpha
+
+  return(cronbachAlpha)
 
 }

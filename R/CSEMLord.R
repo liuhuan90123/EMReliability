@@ -16,7 +16,6 @@ CSEMLord <- function(numOfItem){
   # create matrix to store csem
   csemDat <- matrix(nrow = numOfItem + 1, ncol = 1)
 
-
   # for loop to calculate prob for each true score
   for (i in 0:numOfItem){
 
@@ -40,13 +39,8 @@ CSEMLord <- function(numOfItem){
 
   }
 
-  # format csem data frame
-  csemDat <- as.data.frame(csemDat)
-  names(csemDat) <- c("csemLord")
-  csemDat$rawScore <- c(0:numOfItem)
-
-  # return Lord csem
-  return(csemDat)
+  # return raw score and Lord csem
+  return(list("rawScore" = 0:numOfItem, "csemLord" = as.numeric(csemDat)))
 
 }
 
