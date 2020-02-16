@@ -6,8 +6,8 @@
 
 library(devtools)
 library(roxygen2)
-install.packages("root")
 library(root)
+install.packages("root")
 
 devtools::document()
 
