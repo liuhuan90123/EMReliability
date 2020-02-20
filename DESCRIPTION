@@ -1,9 +1,9 @@
 Package: EMReliability
 Type: Package
-Title: Reliability coefficient calculation in CTT, IRT, and GT
+Title: Reliability and CSEM in CTT, IRT, and GT
 Version: 0.1.0
 Author: Huan Liu, Jihong Zhang
-Maintainer: The package maintainer <yourself@somewhere.net>
+Maintainer: Huan Liu <liuhuanbnu@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?

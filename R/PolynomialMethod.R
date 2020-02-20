@@ -32,7 +32,7 @@ PolynomialMethod <- function(cssemDat, K){
     # check whether regression coefficient of highest order is missing
     if(is.na(regCoef[k+1])){
 
-      warning(paste("The maximum k accepted is", k-1, sep = " "))
+      message(paste("The maximum k accepted is", k-1, sep = " "))
 
       break
 
