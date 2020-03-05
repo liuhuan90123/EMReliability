@@ -17,12 +17,6 @@
 
 RelIRTPoly_new <- function(itemPara, convTable, K, estType){
 
-  # itemPara <- itemPara_A
-  # # convTable <- convTable_A
-  # convTable <- convTable_A_Poly
-  # K <- 20
-  # estType <- "MLE"
-
   if (estType == "MLE"){
 
     # cssem using Polynomial method
