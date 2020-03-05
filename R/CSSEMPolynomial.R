@@ -34,3 +34,12 @@ CSSEMPolynomial <- function(numOfItem, convTable, K){
 
 
 
+
+
+
+
+
+
+
+
+

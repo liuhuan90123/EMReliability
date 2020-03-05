@@ -95,19 +95,22 @@ KolenRelIRT_A
 KolenRelIRT_B <- KolenRelIRT(itemPara_B, convTable_B)
 KolenRelIRT_B
 
+# method 3
 source("R/RelIRTPoly_new.R") # itemPara
 # Reliability for rounded SS using polynomial method
-RelMLEPoly_A <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "MLE")
-RelMLEPoly_A
+RelMLEPoly_A_new <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "MLE")
+RelMLEPoly_A_new
+RelMLEPoly_B_new <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "MLE")
+RelMLEPoly_B_new
 
-RelMLEPoly_B <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "MLE")
-RelMLEPoly_B
+RelEAPPoly_A_new <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "EAP")
+RelEAPPoly_A_new
+RelEAPPoly_B_new <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "EAP")
+RelEAPPoly_B_new
 
-RelEAPPoly_A <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "EAP")
-RelEAPPoly_A
-RelEAPPoly_B <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "EAP")
-RelEAPPoly_B
 
+
+# method 1
 
 RelMLEPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE", rawData_A)
 RelMLEPoly_A
@@ -123,13 +126,13 @@ RelEAPPoly_B
 
 
 
-EAP <- merge(as.data.frame(RelEAPPoly_A), as.data.frame(RelEAPPoly_B), by = "kValue")
-EAP <- merge(EAP, as.data.frame(RelMLEPoly_B),  by = "kValue")
-
-write.csv(EAP, "EAP.csv")
-
-write.csv(RelMLEPoly_A, "RelMLEPoly_A.csv")
-write.csv(RelMLEPoly_B, "RelMLEPoly_B.csv")
+# EAP <- merge(as.data.frame(RelEAPPoly_A), as.data.frame(RelEAPPoly_B), by = "kValue")
+# EAP <- merge(EAP, as.data.frame(RelMLEPoly_B),  by = "kValue")
+#
+# write.csv(EAP, "EAP.csv")
+#
+# write.csv(RelMLEPoly_A, "RelMLEPoly_A.csv")
+# write.csv(RelMLEPoly_B, "RelMLEPoly_B.csv")
 
 ### CSEM --------------------------------------------------------------
 
@@ -150,11 +153,12 @@ csemEAP_B <- CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_B, "EAP")
 csemEAP_B
 
 ### CSSEM -------------------------------------------------------------
+
 # CSSEM Binomial
-csemBinomial_A <- CSSEMBinomial(40, convTable_A)
-csemBinomial_A
-csemBinomial_B <- CSSEMBinomial(40, convTable_B)
-csemBinomial_B
+cssemBinomial_A <- CSSEMBinomial(40, convTable_A)
+cssemBinomial_A
+cssemBinomial_B <- CSSEMBinomial(40, convTable_B)
+cssemBinomial_B
 
 # CSSEM Polynomial
 
@@ -190,200 +194,161 @@ cssemEAPPoly_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")
 cssemEAPPoly_B
 
 
+### Plot function -----------------------------------------------------------------
 
-
-### CSSEM IRT Polynomial MLE New -----------------------------------------------
-
-
-
-
-### method two --------------------------------------------------------------------
-
-
-# theta
-theta <- convTable_B$theta
-
-# CSEM MLE
-itemParaCSEM <- as.data.frame(CSEMIRT(theta, itemPara_B, "EAP"))
-
-# merge data
-itemParaCSEM <- merge(itemParaCSEM, convTable_B_Poly, by = "theta")
-
-# change name to fit Polynomial Method function
-names(itemParaCSEM) <- c("rawScore", "csem", "roundedSS")
-
-# call PM function
-cssemPolyMLE <- PolynomialMethod(itemParaCSEM, 20)
-
-
-
-cssemDat <- itemParaCSEM
-K <- 20
-
-# create data frame to store r square
-rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
-regCoefDat <- list()
-
-# for loop to iterate different k
-for (k in 1:K){
-
-  # fit model with k
-  modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
-
-  # extract regression coefficients
-  regCoef <- summary(modelK)$coefficients[, 1]
-  regCoefDat[[k]] <- summary(modelK)$coefficients
-
-  # extract r square coefficient
-  rSquaredDat[k, 1]<- summary(modelK)$r.squared
-
-  # check whether regression coefficient of highest order is missing
-  if(is.na(regCoef[k+1])){
-
-    message(paste("The maximum k accepted is", k-1, sep = " "))
-
-    break
-
-  }
-
-  # calculate transformation coefficients fx: from 1 to K
-  cssemDat$fx <- 0
-  i <- k
-
-  while(i > 1){
-
-    cssemDat$fx <- cssemDat$fx +  regCoef[i+1] * (i * cssemDat$rawScore^(i-1))
-    i <- i-1
-
-  }
-
-  cssemDat$fx <- cssemDat$fx + regCoef[i+1]
-
-  # calculate cssem using polynomial method
-  cssemDat$cssemPoly <- cssemDat$fx * cssemDat$csem
-
-  # rename variable with indicator k
-  names(cssemDat)[names(cssemDat) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
-
-}
-
-# return(list("RSquared" = as.matrix(rSquaredDat[1:k,]), "CSSEMPoly" = cssemDat))
-
-regCoefDat[[4]]  ## get coefficients for k = 4
-
-
-
-# # SS formula
-#
-# SS = 118.263733790 + 3.909028972 * x -0.360085771 * x^2 -0.036053623 * x^3 + 0.009014156 * x^4
-#
-# f=expression(118.263733790 + 3.909028972 * x -0.360085771 * x^2 -0.036053623 * x^3 + 0.009014156 * x^4)
-# D(f,'x')
-#
-#
-# # CSSEM formula
-#
-# CSSEM = 3.909028972 - 0.360085771 * (2 * x) - 0.036053623 * (3 * x^2) + 0.009014156 * (4 * x^3)
-
-# SS formula
-
-
-
-# names(itemParaCSEM) <- c("theta", 'csemMLE',"scaleScore")
-
-
-# theta
-theta_New <- NormalQuadraPoints(41)$nodes
-weights_New <- NormalQuadraPoints(41)$weights
-
-# CSEM MLE
-itemParaCSEM_New <- as.data.frame(CSEMIRT(theta_New, itemPara_B, "EAP"))
-
-# itemParaCSEM_New <- within(itemParaCSEM_New,{
-#   scaleScoreNew =  118.35478428 + 3.92088450 * theta -0.47021240 * theta^2 -0.03740998 * theta^3 + 0.01328610 * theta^4
-#   cssemNew = 3.92088450 -0.47021240 * (2 * csemMLE) -0.03740998  * (3 * csemMLE^2) + 0.01328610 * (4 * csemMLE^3)
-#   roundedSS = round(scaleScoreNew)
-# })
-
-# form B
-itemParaCSEM_New <- within(itemParaCSEM_New,{
-  scaleScoreNew =  118.35478428 + 3.92088450 * theta -0.47021240 * theta^2 -0.03740998 * theta^3 + 0.01328610 * theta^4
-  cssemNew = 3.92088450 -0.47021240 * (2 * csemEAP) -0.03740998  * (3 * csemEAP^2) + 0.01328610 * (4 * csemEAP^3)
-  roundedSS = scaleScoreNew
-})
-
-# form A
-# itemParaCSEM_New <- within(itemParaCSEM_New,{
-#   scaleScoreNew =  118.263733790 + 3.909028972 * theta -0.360085771 * theta^2 -0.036053623 * theta^3 + 0.009014156 * theta^4
-#   cssemNew = 3.909028972 -0.360085771 * (2 * csemMLE) -0.036053623  * (3 * csemMLE^2) + 0.009014156 * (4 * csemMLE^3)
-#   roundedSS = round(scaleScoreNew)
-# })
-
-### read new posterior distribution rates
-
-postDist <- read.table("TestData/PosteriorDistribution.txt", sep = " ")
-
-plot(postDist$V1, postDist$V2)
-
-
-itemParaCSEM_New$weights_new <- postDist$V2
-
-
-# SS variance
-SSVar <- sum(itemParaCSEM_New$weights_new * (itemParaCSEM_New$roundedSS - weighted.mean(itemParaCSEM_New$roundedSS, itemParaCSEM_New$weights_new))^2)
-
-# error variance
-errorVar <- sum(itemParaCSEM_New$cssemNew * itemParaCSEM_New$weights_new)
-
-# reliability
-RelMLEPolyNew <- 1 - errorVar/SSVar
-RelMLEPolyNew
-
-
-
-
-
-sum(itemParaCSEM_New$weights_new)
-
-
-
-
-# change variable name
-names(cssemPolyMLE$CSSEMPoly)[names(cssemPolyMLE$CSSEMPoly) == 'rawScore'] <- 'theta'
-names(cssemPolyMLE$CSSEMPoly)[names(cssemPolyMLE$CSSEMPoly) == 'csem'] <- 'csemMLE'
-
-# return results
-return(list("RSquared" = cssemPolyMLE$RSquared, "CSSEMPolyMLE" = cssemPolyMLE$CSSEMPoly))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Plot function
 library(ggplot2)
 
-# plot CSEM Lord
-
+# plot CSEM Lord ---------------------------------
 plot(csemLord$rawScore, csemLord$csemLord)
 
-### Plot Kolen CSSEM  ---------------------------------------------------------------------------
-cssemKolen_A <- as.data.frame(cssemKolen_A)
+# ggplot
+csemLord <- as.data.frame(csemLord)
+
+png("csemLord.png",  width = 799, height = 596)
+
+L <- ggplot(csemLord, aes(x = rawScore, y = csemLord)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Raw Score", breaks  = seq(0, 40, 5)) +
+  scale_y_continuous(name = "CSEM Lord Method", breaks  = seq(0, 4, 0.5),
+                     limits = c(0,4)) +
+  theme_bw()
+
+print(L)
+dev.off()
+
+
+
+# plot CSEM MLE/EAP -------------------------------------------------
+plot(csemMLE_A$theta, csemMLE_A$csemMLE)
+plot(csemMLE_B$theta, csemMLE_B$csemMLE)
+
+plot(csemEAP_A$theta, csemEAP_A$csemEAP)
+plot(csemEAP_B$theta, csemEAP_B$csemEAP)
+
+# ggplot
+# MLE -----------------
+csemMLE_A <- as.data.frame(csemMLE_A)
+
+png("csemMLE_A.png",  width = 799, height = 596)
+
+csemMLE_A_P <- ggplot(csemMLE_A, aes(x = theta, y = csemMLE)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+  scale_y_continuous(name = "CSSEM MLE", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(csemMLE_A_P)
+dev.off()
+
+
+csemMLE_B <- as.data.frame(csemMLE_B)
+
+png("csemMLE_B.png",  width = 799, height = 596)
+
+csemMLE_B_P <- ggplot(csemMLE_B, aes(x = theta, y = csemMLE)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+  scale_y_continuous(name = "CSSEM MLE", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(csemMLE_B_P)
+dev.off()
+
+# EAP -------------
+
+csemEAP_A <- as.data.frame(csemEAP_A)
+
+png("csemEAP_A.png",  width = 799, height = 596)
+
+csemEAP_A_P <- ggplot(csemEAP_A, aes(x = theta, y = csemEAP)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+  scale_y_continuous(name = "CSSEM EAP", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(csemEAP_A_P)
+dev.off()
+
+
+csemEAP_B <- as.data.frame(csemEAP_B)
+
+png("csemEAP_B.png",  width = 799, height = 596)
+
+csemEAP_B_P <- ggplot(csemEAP_B, aes(x = theta, y = csemEAP)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+  scale_y_continuous(name = "CSSEM EAP", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(csemEAP_B_P)
+dev.off()
+
+
+
+# plot cssem Binomial --------------------------------------------------------------------
+plot(cssemBinomial_A$roundedSS, cssemBinomial_A$cssemBinomial)
+plot(cssemBinomial_B$roundedSS, cssemBinomial_B$cssemBinomial)
+
+# many to one aggr
+cssemBinomial_A <- as.data.frame(cssemBinomial_A)
+cssemBinomial_B <- as.data.frame(cssemBinomial_B)
+
+cssemBinomial_A_Aggre <- aggregate(cssemBinomial_A$cssemBinomial, by=list(Category=cssemBinomial_A$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+cssemBinomial_B_Aggre <- aggregate(cssemBinomial_B$cssemBinomial, by=list(Category=cssemBinomial_B$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+names(cssemBinomial_A_Aggre) <- names(cssemBinomial_B_Aggre) <- c("roundedSS", "cssemBinomial")
+
+plot(cssemBinomial_A_Aggre$roundedSS, cssemBinomial_A_Aggre$cssemBinomial)
+plot(cssemBinomial_B_Aggre$roundedSS, cssemBinomial_B_Aggre$cssemBinomial)
+
+
+# ggplot
+
+
+png("CSSEM_Binomial_A.png",  width = 799, height = 596)
+
+CSSEM_Binomial_A_P <- ggplot(cssemBinomial_A_Aggre, aes(x = roundedSS, y = cssemBinomial)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Binomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(CSSEM_Binomial_A_P)
+dev.off()
+
+
+png("CSSEM_Binomial_B.png",  width = 799, height = 596)
+
+CSSEM_Binomial_B_P <- ggplot(cssemBinomial_B_Aggre, aes(x = roundedSS, y = cssemBinomial)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Binomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(CSSEM_Binomial_B_P)
+dev.off()
+
+
+
+
+# plot cssem Kolen's method ------------------------------------------------------------
+# plot
 plot(cssemKolen_A$trueScaleScore, cssemKolen_A$cssemKolen)
+plot(cssemKolen_B$trueScaleScore, cssemKolen_B$cssemKolen)
+
+# ggplot
+cssemKolen_A <- as.data.frame(cssemKolen_A)
 
 png("CSSEM_KolenIRT_A.png",  width = 799, height = 596)
 
 KA <- ggplot(cssemKolen_A, aes(x = trueScaleScore, y = cssemKolen)) +
-  geom_point(size = 2) +
+  geom_point(size = 1.5) +
   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
                      limits = c(0,3)) +
@@ -392,30 +357,60 @@ KA <- ggplot(cssemKolen_A, aes(x = trueScaleScore, y = cssemKolen)) +
 print(KA)
 dev.off()
 
+cssemKolen_B <- as.data.frame(cssemKolen_B)
+
+png("CSSEM_KolenIRT_B.png",  width = 799, height = 596)
+
+KB <- ggplot(cssemKolen_B, aes(x = trueScaleScore, y = cssemKolen)) +
+  geom_point(size = 1.5) +
+  scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw()
+
+print(KB)
+dev.off()
 
 
-### plot CSSEM Polynomial ---------------------------------------------------------------------------
+
+# plot cssem polynomial methodb  --------------------------
+
+# form A
+cssemDat <- CSSEMPolynomial(40, convTable_A_sub, 20)$"CSSEMPolynomial"
+k <- 13 # test, accepted maximum + 1
+
+# form B
+cssemDat <- CSSEMPolynomial(40, convTable_B_sub, 20)$"CSSEMPolynomial"
+k <- 13 # test, accepted maximum + 1
+
+
+# plot cssem IRT polynomial method ------------------
+
+# CSSEM IRT MLE Polynomial
+cssemDat <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")$"CSSEMPolyMLE"
+k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+cssemDat <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")$"CSSEMPolyMLE"
+k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+
+# CSSEM IRT EAP Polynomial
+cssemDat <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP")$"CSSEMPolyEAP"
+k <- 10 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+cssemDat <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")$"CSSEMPolyEAP"
+k <- 5 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
 
 
 
-#### Plot --------------------------------------
-library(ggplot2)
+
+
 
 ### aggregate many to one ------------
 
-
-cssemDatWide <- CSSEMPolynomial(40, convTableSub, K)$"CSSEM Polynomial Method"
-cssemDat <- cssemDatWide # test
-k <- 13 # test, accepted maximum + 1
 cssemDat <- cssemDat[,c(3,5:(5+k-2))]
-cssemDatAggre <- as.data.frame(apply(cssemDat[,c(-1)], 2, function(x) aggregate(x, by=list(Category=cssemDat$roundedSS), FUN=mean)))
-cssemDatAggre <- cssemDatAggre[,c(1, seq(2, 24, 2))]
-
+cssemDatAggre <- as.data.frame(apply(cssemDat[,c(-1)], 2, function(x) aggregate(x, by=list(Category=cssemDat$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})))
+cssemDatAggre <- cssemDatAggre[,c(1, seq(2, 2*(k-1), 2))]
 
 
 ### plot all ks ---------------------------------------------------
-
-k <- 13 # The maximum accepted K
 
 cssemDatLong <- reshape(cssemDatAggre,
                         direction = "long",
@@ -426,8 +421,12 @@ cssemDatLong <- reshape(cssemDatAggre,
                         times = 1:(k-1))
 
 
-library(ggplot2)
-ggplot(cssemDatLong, aes(x = cssemPolyk1.Category, y = cssempoly, color = factor(Kvalue))) +
+
+
+
+png("CSSEM_poly_A.png",  width = 799, height = 596)
+
+CSSEM_poly_A_P <- ggplot(cssemDatLong, aes(x = cssemPolyk1.Category, y = cssempoly, color = factor(Kvalue))) +
   geom_point() +
   scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
   scale_y_continuous(name = "CSSEM Polynomial Method") +
@@ -435,19 +434,52 @@ ggplot(cssemDatLong, aes(x = cssemPolyk1.Category, y = cssempoly, color = factor
   theme_bw() +
   labs(colour="K value")
 
+print(CSSEM_poly_A_P)
+dev.off()
 
 
-### range and confidence interval  with k from 1 to maximum accepted ----------
+
+
+png("CSSEM_poly_B.png",  width = 799, height = 596)
+
+CSSEM_poly_B_P <- ggplot(cssemDatLong, aes(x = cssemPolyk1.Category, y = cssempoly, color = factor(Kvalue))) +
+  geom_point() +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Polynomial Method") +
+  geom_line() +
+  theme_bw() +
+  labs(colour="K value")
+
+print(CSSEM_poly_B_P)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### range and confidence interval  with k from 1 to maximum accepted ----------1111111111111111111111111---------
+
+cssemDatAggre_1 <- cssemDatAggre
+
 
 # moments
-cssemDatAggre$max <- apply(cssemDatAggre[,c(-1)], 1, max)
-cssemDatAggre$min <- apply(cssemDatAggre[,c(-1)], 1, min)
-cssemDatAggre$mean <- apply(cssemDatAggre[,c(-1)], 1, mean)
-cssemDatAggre$median <- apply(cssemDatAggre[,c(-1)], 1, median)
-cssemDatAggre$sd <- apply(cssemDatAggre[,c(-1)], 1, sd)
+cssemDatAggre_1$max <- apply(cssemDatAggre_1[,c(-1)], 1, max)
+cssemDatAggre_1$min <- apply(cssemDatAggre_1[,c(-1)], 1, min)
+cssemDatAggre_1$mean <- apply(cssemDatAggre_1[,c(-1)], 1, mean)
+cssemDatAggre_1$median <- apply(cssemDatAggre_1[,c(-1)], 1, median)
+cssemDatAggre_1$sd <- apply(cssemDatAggre_1[,c(-1)], 1, sd)
 
 # 95% confidence interval
-cssemDatAggre_1 <- within(cssemDatAggre, {
+cssemDatAggre_1 <- within(cssemDatAggre_1, {
   lower = mean - 1.96 * sd
   upper = mean + 1.96 * sd
 })
@@ -465,17 +497,23 @@ ggplot(cssemDatAggre_1, aes(x = cssemPolyk1.Category, y = mean)) +
   scale_y_continuous(name = "CSSEM Polynomial Method") +
   theme_bw()
 
+
+
+
 ### range and confidence interval  with k from 3 to maximum accepted ---333333333333333333333333333333-------
 
+cssemDatAggre_3 <- cssemDatAggre
+
+
 # moments
-cssemDatAggre$max <- apply(cssemDatAggre[,c(-1:-3)], 1, max)
-cssemDatAggre$min <- apply(cssemDatAggre[,c(-1:-3)], 1, min)
-cssemDatAggre$mean <- apply(cssemDatAggre[,c(-1:-3)], 1, mean)
-cssemDatAggre$median <- apply(cssemDatAggre[,c(-1:-3)], 1, median)
-cssemDatAggre$sd <- apply(cssemDatAggre[,c(-1:-3)], 1, sd)
+cssemDatAggre_3$max <- apply(cssemDatAggre_3[,c(-1:-3)], 1, max)
+cssemDatAggre_3$min <- apply(cssemDatAggre_3[,c(-1:-3)], 1, min)
+cssemDatAggre_3$mean <- apply(cssemDatAggre_3[,c(-1:-3)], 1, mean)
+cssemDatAggre_3$median <- apply(cssemDatAggre_3[,c(-1:-3)], 1, median)
+cssemDatAggre_3$sd <- apply(cssemDatAggre_3[,c(-1:-3)], 1, sd)
 
 # 95% confidence interval
-cssemDatAggre <- within(cssemDatAggre, {
+cssemDatAggre_3 <- within(cssemDatAggre_3, {
   lower = mean - 1.96 * sd
   upper = mean + 1.96 * sd
 })
@@ -483,9 +521,9 @@ cssemDatAggre <- within(cssemDatAggre, {
 
 ### plot confidence interval
 
-# k = 1 to maximum accepted
+# k = 3 to maximum accepted
 
-ggplot(cssemDatAggre, aes(x = cssemPolyk1.Category, y = mean)) +
+ggplot(cssemDatAggre_3, aes(x = cssemPolyk1.Category, y = mean)) +
   geom_line(colour ="blue") +
   geom_point(colour="blue") +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill= "blue", alpha = 0.2) +
@@ -497,4 +535,195 @@ ggplot(cssemDatAggre, aes(x = cssemPolyk1.Category, y = mean)) +
 
 
 
+### polynomial method model fit --------------------------
+
+
+
+# csem Lord
+csemLordDat <- CSEMLord(numOfItem)
+
+# merge with converstion table
+cssemDat <- merge(csemLordDat, convTable_A_sub, by = "rawScore")
+
+# change variable name
+names(cssemDat)[names(cssemDat) == 'csemLord'] <- 'csem'
+
+
+library(ggplot2)
+
+modelK <- lm(roundedSS ~ poly(rawScore, 3, raw=TRUE), cssemDat)
+
+prd <- data.frame(rawScore = seq(from = range(cssemDat$rawScore)[1], to = range(cssemDat$rawScore)[2], length.out = 100))
+
+prd$predictedSS <- predict(modelK, newdata = prd, se.modelK = TRUE)
+
+ggplot(prd, aes(x = rawScore, y = predictedSS)) +
+  theme_bw() +
+  geom_line() +
+  geom_point(data = cssemDat, aes(x = rawScore, y = roundedSS))
+
+
+
+
+
+
+### CSSEM IRT Polynomial MLE New -----------------------------------------------
+
+# ### method two --------------------------------------------------------------------
+#
+#
+# # theta
+# theta <- convTable_B$theta
+#
+# # CSEM MLE
+# itemParaCSEM <- as.data.frame(CSEMIRT(theta, itemPara_B, "EAP"))
+#
+# # merge data
+# itemParaCSEM <- merge(itemParaCSEM, convTable_B_Poly, by = "theta")
+#
+# # change name to fit Polynomial Method function
+# names(itemParaCSEM) <- c("rawScore", "csem", "roundedSS")
+#
+# # call PM function
+# cssemPolyMLE <- PolynomialMethod(itemParaCSEM, 20)
+#
+#
+#
+# cssemDat <- itemParaCSEM
+# K <- 20
+#
+# # create data frame to store r square
+# rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
+# regCoefDat <- list()
+#
+# # for loop to iterate different k
+# for (k in 1:K){
+#
+#   # fit model with k
+#   modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
+#
+#   # extract regression coefficients
+#   regCoef <- summary(modelK)$coefficients[, 1]
+#   regCoefDat[[k]] <- summary(modelK)$coefficients
+#
+#   # extract r square coefficient
+#   rSquaredDat[k, 1]<- summary(modelK)$r.squared
+#
+#   # check whether regression coefficient of highest order is missing
+#   if(is.na(regCoef[k+1])){
+#
+#     message(paste("The maximum k accepted is", k-1, sep = " "))
+#
+#     break
+#
+#   }
+#
+#   # calculate transformation coefficients fx: from 1 to K
+#   cssemDat$fx <- 0
+#   i <- k
+#
+#   while(i > 1){
+#
+#     cssemDat$fx <- cssemDat$fx +  regCoef[i+1] * (i * cssemDat$rawScore^(i-1))
+#     i <- i-1
+#
+#   }
+#
+#   cssemDat$fx <- cssemDat$fx + regCoef[i+1]
+#
+#   # calculate cssem using polynomial method
+#   cssemDat$cssemPoly <- cssemDat$fx * cssemDat$csem
+#
+#   # rename variable with indicator k
+#   names(cssemDat)[names(cssemDat) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
+#
+# }
+#
+# # return(list("RSquared" = as.matrix(rSquaredDat[1:k,]), "CSSEMPoly" = cssemDat))
+#
+# regCoefDat[[4]]  ## get coefficients for k = 4
+#
+#
+#
+# # # SS formula
+# #
+# # SS = 118.263733790 + 3.909028972 * x -0.360085771 * x^2 -0.036053623 * x^3 + 0.009014156 * x^4
+# #
+# # f=expression(118.263733790 + 3.909028972 * x -0.360085771 * x^2 -0.036053623 * x^3 + 0.009014156 * x^4)
+# # D(f,'x')
+# #
+# #
+# # # CSSEM formula
+# #
+# # CSSEM = 3.909028972 - 0.360085771 * (2 * x) - 0.036053623 * (3 * x^2) + 0.009014156 * (4 * x^3)
+#
+# # SS formula
+#
+#
+#
+# # names(itemParaCSEM) <- c("theta", 'csemMLE',"scaleScore")
+#
+#
+# # theta
+# theta_New <- NormalQuadraPoints(41)$nodes
+# weights_New <- NormalQuadraPoints(41)$weights
+#
+# # CSEM MLE
+# itemParaCSEM_New <- as.data.frame(CSEMIRT(theta_New, itemPara_B, "EAP"))
+#
+# # itemParaCSEM_New <- within(itemParaCSEM_New,{
+# #   scaleScoreNew =  118.35478428 + 3.92088450 * theta -0.47021240 * theta^2 -0.03740998 * theta^3 + 0.01328610 * theta^4
+# #   cssemNew = 3.92088450 -0.47021240 * (2 * csemMLE) -0.03740998  * (3 * csemMLE^2) + 0.01328610 * (4 * csemMLE^3)
+# #   roundedSS = round(scaleScoreNew)
+# # })
+#
+# # form B
+# itemParaCSEM_New <- within(itemParaCSEM_New,{
+#   scaleScoreNew =  118.35478428 + 3.92088450 * theta -0.47021240 * theta^2 -0.03740998 * theta^3 + 0.01328610 * theta^4
+#   cssemNew = 3.92088450 -0.47021240 * (2 * csemEAP) -0.03740998  * (3 * csemEAP^2) + 0.01328610 * (4 * csemEAP^3)
+#   roundedSS = scaleScoreNew
+# })
+#
+# # form A
+# # itemParaCSEM_New <- within(itemParaCSEM_New,{
+# #   scaleScoreNew =  118.263733790 + 3.909028972 * theta -0.360085771 * theta^2 -0.036053623 * theta^3 + 0.009014156 * theta^4
+# #   cssemNew = 3.909028972 -0.360085771 * (2 * csemMLE) -0.036053623  * (3 * csemMLE^2) + 0.009014156 * (4 * csemMLE^3)
+# #   roundedSS = round(scaleScoreNew)
+# # })
+#
+# ### read new posterior distribution rates
+#
+# postDist <- read.table("TestData/PosteriorDistribution.txt", sep = " ")
+#
+# plot(postDist$V1, postDist$V2)
+#
+#
+# itemParaCSEM_New$weights_new <- postDist$V2
+#
+#
+# # SS variance
+# SSVar <- sum(itemParaCSEM_New$weights_new * (itemParaCSEM_New$roundedSS - weighted.mean(itemParaCSEM_New$roundedSS, itemParaCSEM_New$weights_new))^2)
+#
+# # error variance
+# errorVar <- sum(itemParaCSEM_New$cssemNew * itemParaCSEM_New$weights_new)
+#
+# # reliability
+# RelMLEPolyNew <- 1 - errorVar/SSVar
+# RelMLEPolyNew
+#
+#
+#
+#
+#
+# sum(itemParaCSEM_New$weights_new)
+#
+#
+#
+#
+# # change variable name
+# names(cssemPolyMLE$CSSEMPoly)[names(cssemPolyMLE$CSSEMPoly) == 'rawScore'] <- 'theta'
+# names(cssemPolyMLE$CSSEMPoly)[names(cssemPolyMLE$CSSEMPoly) == 'csem'] <- 'csemMLE'
+#
+# # return results
+# return(list("RSquared" = cssemPolyMLE$RSquared, "CSSEMPolyMLE" = cssemPolyMLE$CSSEMPoly))
 

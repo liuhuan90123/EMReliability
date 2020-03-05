@@ -60,7 +60,7 @@ RelIRTPoly_new <- function(itemPara, convTable, K, estType){
     cssemEAPPolyDat <- CSSEMIRTPoly(itemPara, convTable, K, "EAP")$CSSEMPolyEAP
 
     # weight
-    cssemMLEPolyDat$wt <- sapply(cssemMLEPolyDat$theta, FUN = function(x) dnorm(x)) / sum(sapply(cssemMLEPolyDat$theta, FUN = function(x) dnorm(x)))
+    cssemEAPPolyDat$wt <- sapply(cssemEAPPolyDat$theta, FUN = function(x) dnorm(x)) / sum(sapply(cssemEAPPolyDat$theta, FUN = function(x) dnorm(x)))
 
     # SS variance
     SSVar <- sum(cssemEAPPolyDat$wt * (cssemEAPPolyDat$roundedSS - weighted.mean(cssemEAPPolyDat$roundedSS, cssemEAPPolyDat$wt))^2)
