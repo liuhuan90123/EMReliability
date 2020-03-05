@@ -16,8 +16,19 @@
 
 CSSEMIRTPoly <- function(itemPara, convTable, K, estType){
 
+
+
+  # itemPara <- itemPara_A
+  # convTable <- convTable_A
+  # K <- 20
+  # estType <- "MLE"
+
+
+
   # theta
   theta <- convTable$theta
+
+
 
 
   # return info for each theta

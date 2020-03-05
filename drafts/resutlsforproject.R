@@ -95,9 +95,23 @@ KolenRelIRT_A
 KolenRelIRT_B <- KolenRelIRT(itemPara_B, convTable_B)
 KolenRelIRT_B
 
+source("R/RelIRTPoly_new.R") # itemPara
 # Reliability for rounded SS using polynomial method
+RelMLEPoly_A <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "MLE")
+RelMLEPoly_A
+
+RelMLEPoly_B <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "MLE")
+RelMLEPoly_B
+
+RelEAPPoly_A <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "EAP")
+RelEAPPoly_A
+RelEAPPoly_B <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "EAP")
+RelEAPPoly_B
+
+
 RelMLEPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE", rawData_A)
 RelMLEPoly_A
+
 RelMLEPoly_B <- RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE", rawData_B)
 RelMLEPoly_B
 
@@ -105,6 +119,9 @@ RelEAPPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP", rawData_A)
 RelEAPPoly_A
 RelEAPPoly_B <- RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP", rawData_B)
 RelEAPPoly_B
+
+
+
 
 EAP <- merge(as.data.frame(RelEAPPoly_A), as.data.frame(RelEAPPoly_B), by = "kValue")
 EAP <- merge(EAP, as.data.frame(RelMLEPoly_B),  by = "kValue")
@@ -292,7 +309,7 @@ itemParaCSEM_New <- as.data.frame(CSEMIRT(theta_New, itemPara_B, "EAP"))
 itemParaCSEM_New <- within(itemParaCSEM_New,{
   scaleScoreNew =  118.35478428 + 3.92088450 * theta -0.47021240 * theta^2 -0.03740998 * theta^3 + 0.01328610 * theta^4
   cssemNew = 3.92088450 -0.47021240 * (2 * csemEAP) -0.03740998  * (3 * csemEAP^2) + 0.01328610 * (4 * csemEAP^3)
-  roundedSS = round(scaleScoreNew)
+  roundedSS = scaleScoreNew
 })
 
 # form A
@@ -321,6 +338,8 @@ errorVar <- sum(itemParaCSEM_New$cssemNew * itemParaCSEM_New$weights_new)
 # reliability
 RelMLEPolyNew <- 1 - errorVar/SSVar
 RelMLEPolyNew
+
+
 
 
 

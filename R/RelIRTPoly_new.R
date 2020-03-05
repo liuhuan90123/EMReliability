@@ -4,7 +4,7 @@
 #' A function to calculate reliability for Scale Scores using Polynomial Method based on IRT CSEM
 #'
 #' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
-#' @param convTable a data frame or matrix containing conversion table of raw score to scale score
+#' @param convTable a data frame or matrix containing conversion table of raw score to scale score, only raw score and scale score
 #' @param K a numeric number indicating highest degree of polynomial regression
 #' @param estType estimation method, MLE or EAP
 #' @param rawData raw data matrix
@@ -15,27 +15,21 @@
 #' @export
 
 
+RelIRTPoly_new <- function(itemPara, convTable, K, estType){
 
-RelIRTPoly <- function(itemPara, convTable, K, estType, rawData){
-
-  # raw score frequence
-  rawFreq <- as.data.frame(table(rowSums(rawData)))
-  names(rawFreq) <- c("rawScore", "freq")
-
+  # itemPara <- itemPara_A
+  # # convTable <- convTable_A
+  # convTable <- convTable_A_Poly
+  # K <- 20
+  # estType <- "MLE"
 
   if (estType == "MLE"){
 
     # cssem using Polynomial method
     cssemMLEPolyDat <- CSSEMIRTPoly(itemPara, convTable, K, "MLE")$CSSEMPolyMLE
 
-    # raw score
-    cssemMLEPolyDat$rawScore <- c(0:nrow(itemPara))
-
-    # merge data
-    cssemMLEPolyDat <- merge(cssemMLEPolyDat, rawFreq, by = "rawScore")
-
     # weight
-    cssemMLEPolyDat$wt <- cssemMLEPolyDat$freq / sum(cssemMLEPolyDat$freq)
+    cssemMLEPolyDat$wt <- sapply(cssemMLEPolyDat$theta, FUN = function(x) dnorm(x)) / sum(sapply(cssemMLEPolyDat$theta, FUN = function(x) dnorm(x)))
 
     # SS variance
     SSVar <- sum(cssemMLEPolyDat$wt * (cssemMLEPolyDat$roundedSS - weighted.mean(cssemMLEPolyDat$roundedSS, cssemMLEPolyDat$wt))^2)
@@ -65,14 +59,8 @@ RelIRTPoly <- function(itemPara, convTable, K, estType, rawData){
     # cssem using Polynomial method
     cssemEAPPolyDat <- CSSEMIRTPoly(itemPara, convTable, K, "EAP")$CSSEMPolyEAP
 
-    # raw score
-    cssemEAPPolyDat$rawScore <- c(0:nrow(itemPara))
-
-    # merge data
-    cssemEAPPolyDat <- merge(cssemEAPPolyDat, rawFreq, by = "rawScore")
-
     # weight
-    cssemEAPPolyDat$wt <- cssemEAPPolyDat$freq / sum(cssemEAPPolyDat$freq)
+    cssemMLEPolyDat$wt <- sapply(cssemMLEPolyDat$theta, FUN = function(x) dnorm(x)) / sum(sapply(cssemMLEPolyDat$theta, FUN = function(x) dnorm(x)))
 
     # SS variance
     SSVar <- sum(cssemEAPPolyDat$wt * (cssemEAPPolyDat$roundedSS - weighted.mean(cssemEAPPolyDat$roundedSS, cssemEAPPolyDat$wt))^2)
