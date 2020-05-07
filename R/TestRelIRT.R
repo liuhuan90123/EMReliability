@@ -81,10 +81,13 @@ TestRelIRT <- function(itemPara){
   fxTheta$weights <- quadPoints$weights
 
   # calculate weighted distribution
-  fxThetaWeighted <- apply(fxTheta[,1:41], 2, function(x) x * fxTheta[,"weights"])
+  # fxThetaWeighted <- apply(fxTheta[,1:41], 2, function(x) x * fxTheta[,"weights"])
+
+  fxThetaWeighted <- apply(fxTheta[,1:(1 + numOfItem)], 2, function(x) x * fxTheta[,"weights"])
 
   # sum weighted distribution
-  fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:41]), nrow = 41, ncol = 1))
+  #fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:41]), nrow = 41, ncol = 1))
+  fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
   fxDist$X <- c(numOfItem:0)
   names(fxDist) <- c("wts", "X")
 
