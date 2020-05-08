@@ -13,9 +13,11 @@ itemPara_A[,"a"] <- itemPara_A[,"a"]/1.702
 
 itemPara_B <- read.table("TestData/SpanishLit_prm_B.txt")[,c(7,8)]
 names(itemPara_B) <- c("b", "a")
-itemPara_B[,"b"] <- -itemPara_B[,"b"]/itemPara_A[,"a"]
+itemPara_B[,"b"] <- -itemPara_B[,"b"]/itemPara_B[,"a"]
 itemPara_B[,"a"] <- itemPara_B[,"a"]/1.702
 
+# change extreme b value
+itemPara_B[3,1] <- -5
 
 
 # CronbachAlpha & GT
@@ -52,3 +54,15 @@ MarginalRelEAP_A
 
 MarginalRelEAP_B <- MarginalRelIRT(itemPara_B, "EAP")
 MarginalRelEAP_B
+
+
+# Stratified Alpha
+CronbachAlpha(rawData_A, strat = c(13, 12, 6))
+CronbachAlpha(rawData_B, strat = c(13, 12, 6))
+
+
+
+
+
+
+
