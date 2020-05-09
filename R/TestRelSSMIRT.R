@@ -100,17 +100,17 @@ FX <- function(itemPara, newWts){
 # item parameters
 
 # read item parameters from txt file
-# itemPara_A_SS <- read.table("TestData/SpanishLit_prm_A_SS.txt")[,c(7:10)]
-# cor <- matrix(c(1, 0.9067069, 0.6994119,
-#                 0.9067069, 1, 0.4891160,
-#                 0.6994119,0.4891160,1), nrow = 3)
+itemPara_A_SS <- read.table("TestData/SpanishLit_prm_A_SS.txt")[,c(7:10)]
+cor <- matrix(c(1, 0.9067069, 0.6994119,
+                0.9067069, 1, 0.4891160,
+                0.6994119,0.4891160,1), nrow = 3)
 
 # form B
-itemPara_A_SS <- read.table("TestData/SpanishLit_prm_B_SS.txt")[,c(7:10)]
-
-cor <- matrix(c(1, 0.97, 0.56,
-                0.97, 1, 0.48,
-                0.56,0.48,1), nrow = 3)
+# itemPara_A_SS <- read.table("TestData/SpanishLit_prm_B_SS.txt")[,c(7:10)]
+#
+# cor <- matrix(c(1, 0.97, 0.56,
+#                 0.97, 1, 0.48,
+#                 0.56,0.48,1), nrow = 3)
 
 
 
@@ -298,7 +298,7 @@ fyThetaWeighted <- apply(nodes3[,7:(7 + numOfItem)], 2, function(x) x * nodes3[,
 
 # sum weighted distribution
 # fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:32]), nrow = 32, ncol = 1))
-fyObsDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
+fyObsDist <- as.data.frame(matrix(colSums(fyThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
 fyObsDist$X <- c(numOfItem:0)
 names(fyObsDist) <- c("wts", "y")
 fyObsDist
@@ -317,9 +317,10 @@ varianceObsY
 
 
 
+# Form B : 0.721
+# Form A : 0.737
 
-
-
+CSEMIRT(-1.880281, itemPara_A_SS[1:13, c("b", "a")], "MLE")
 
 
 
