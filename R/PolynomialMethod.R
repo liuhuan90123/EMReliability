@@ -3,7 +3,7 @@
 #' @description
 #' A function to implement polynomial method in calculating CSSEM
 #'
-#' @param cssemDat a ata frame or matrix containing conversion table of raw score to scale score, and csem of raw score
+#' @param cssemDat a data frame or matrix containing conversion table of raw score to scale score, and csem of raw score
 #' @param K degree of polynomial regression
 #'
 #' @return a data frame containing CSSEM using Polynomial Method using different k values

@@ -17,9 +17,6 @@
 
 Info <- function(theta, itemPara, estType){
 
-  # itemPara <- itemPara_A # test
-  # theta <- NormalQuadraPoints(41)$nodes
-
   if (ncol(itemPara) == 3){
     #  item parameters should be on the 1.702 metric
     names(itemPara) <- c("b", "a", "c")
@@ -41,15 +38,6 @@ Info <- function(theta, itemPara, estType){
   # replicate item parameter and theta
   itemParaRep <-itemPara[rep(seq_len(nrow(itemPara)), each = length(theta)),]
   itemParaRep$theta <- rep(theta, each = 1, length.out = length(theta)*nrow(itemPara))
-
-
-  # # calculate information by theta 2PL
-  # itemParaRep <- within(itemParaRep, {
-  #   P = 0 + (1 - 0) / (1 + exp(-1.702 * a * (theta - b)))
-  #   Q = 1 - P
-  #   PQ = P * Q
-  #   info = 1.702**2 * a**2 * P * Q
-  # })
 
   # calculate information by theta 3PL
   itemParaRep <- within(itemParaRep, {

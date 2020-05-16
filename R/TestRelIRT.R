@@ -11,8 +11,23 @@
 
 TestRelIRT <- function(itemPara){
 
-  # transform item parameters to the logistic metric
-  names(itemPara) <- c("b", "a")
+  if (ncol(itemPara) == 3){
+    #  item parameters should be on the 1.702 metric
+    names(itemPara) <- c("b", "a", "c")
+  }
+
+  if (ncol(itemPara) == 2){
+    #  item parameters should be on the 1.702 metric
+    names(itemPara) <- c("b", "a")
+    itemPara$c <- 0
+  }
+
+  if (ncol(itemPara) == 1){
+    #  item parameters should be on the 1.702 metric
+    names(itemPara) <- c("b")
+    itemPara$a <- 1
+    itemPara$c <- 0
+  }
 
   # num of items
   numOfItem <- nrow(itemPara)
@@ -29,7 +44,7 @@ TestRelIRT <- function(itemPara){
 
   # calculate information by theta
   itemParaRep <- within(itemParaRep, {
-    P = 0 + (1 - 0) / (1 + exp(-1.702 * a * (theta - b)))
+    P = c + (1 - c) / (1 + exp(-1.702 * a * (theta - b)))
     Q = 1 - P
     PQ = P * Q
     info = 1.702**2 * a**2 * P * Q
@@ -81,12 +96,9 @@ TestRelIRT <- function(itemPara){
   fxTheta$weights <- quadPoints$weights
 
   # calculate weighted distribution
-  # fxThetaWeighted <- apply(fxTheta[,1:41], 2, function(x) x * fxTheta[,"weights"])
-
   fxThetaWeighted <- apply(fxTheta[,1:(1 + numOfItem)], 2, function(x) x * fxTheta[,"weights"])
 
   # sum weighted distribution
-  #fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:41]), nrow = 41, ncol = 1))
   fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
   fxDist$X <- c(numOfItem:0)
   names(fxDist) <- c("wts", "X")

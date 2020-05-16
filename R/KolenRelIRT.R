@@ -14,8 +14,23 @@
 
 KolenRelIRT <- function(itemPara, convTable){
 
-  # transform item parameters to the 1.702 metric
-  names(itemPara) <- c("b", "a")
+  if (ncol(itemPara) == 3){
+    #  item parameters should be on the 1.702 metric
+    names(itemPara) <- c("b", "a", "c")
+  }
+
+  if (ncol(itemPara) == 2){
+    #  item parameters should be on the 1.702 metric
+    names(itemPara) <- c("b", "a")
+    itemPara$c <- 0
+  }
+
+  if (ncol(itemPara) == 1){
+    #  item parameters should be on the 1.702 metric
+    names(itemPara) <- c("b")
+    itemPara$a <- 1
+    itemPara$c <- 0
+  }
 
   # number of quadrature
   numOfQuad <- 41
@@ -24,7 +39,7 @@ KolenRelIRT <- function(itemPara, convTable){
   numOfItem <- nrow(itemPara)
 
   # weights and nodes
-  quadPoints <- NormalQuadraPoints(41)
+  quadPoints <- NormalQuadraPoints(numOfQuad)
 
   # replicate item parameter and theta
   itemParaRep <-itemPara[rep(seq_len(numOfItem), each = numOfQuad),]
@@ -32,7 +47,7 @@ KolenRelIRT <- function(itemPara, convTable){
 
   # calculate information by theta
   itemParaRep <- within(itemParaRep, {
-    P = 0 + (1 - 0) / (1 + exp(-1.702 * a * (theta - b)))
+    P = c + (1 - c) / (1 + exp(-1.702 * a * (theta - b)))
     Q = 1 - P
     PQ = P * Q
     info = 1.702**2 * a**2 * P * Q
