@@ -48,6 +48,106 @@ convTable_A_Poly <- convTable_A[,c("theta", "roundedSS")]
 convTable_B_Poly <- convTable_B[,c("theta", "roundedSS")]
 
 
+# criteria
+# raw score
+cor(rowSums(rawData_A),rowSums(rawData_B))
+
+# SS(X)
+rawScore_A <- as.data.frame(rowSums(rawData_A))
+names(rawScore_A) <- "rawScore"
+rawSS_A <- left_join(rawScore_A, convTable_A, by = "rawScore")
+
+rawScore_B <- as.data.frame(rowSums(rawData_B))
+names(rawScore_B) <- "rawScore"
+rawSS_B <- left_join(rawScore_B, convTable_B, by = "rawScore")
+
+cor(rawSS_A$roundedSS, rawSS_B$roundedSS)
+
+
+
+# theta score
+thetaMLE_A <- read.table("TestData/UShistory_X-sco.txt")[,4]
+thetaMLE_B <- read.table("TestData/UShistory_Y-sco.txt")[,4]
+cor(thetaMLE_A, thetaMLE_B)
+
+thetaEAP_A <- read.table("TestData/UShistory_X_EAP-sco.txt")[,3]
+thetaEAP_B <- read.table("TestData/UShistory_Y_EAP-sco.txt")[,3]
+cor(thetaEAP_A, thetaEAP_B)
+
+# SS(theta)
+
+thetaToSS <- function(theta, convTable, itemPara){
+
+  thetaMLE <- as.data.frame(theta)
+  # default K
+  K <- 20
+
+  rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
+
+  # for loop to iterate different k
+  for (k in 1:K){
+
+    # fit model with k
+    modelK <- lm(roundedSS ~ poly(theta, k, raw=TRUE), convTable)
+
+    # extract regression coefficients
+    regCoef <- summary(modelK)$coefficients[, 1]
+
+    # extract r square coefficient
+    rSquaredDat[k, 1]<- summary(modelK)$r.squared
+
+    # check whether regression coefficient of highest order is missing
+    if(is.na(regCoef[k+1])){
+
+      message(paste("The maximum k accepted is", k-1, sep = " "))
+
+      break
+
+    }
+
+    # calculate SS: from 1 to K
+    thetaMLE$SS <- 0
+    i <- k
+
+    while(i > 0){
+
+      thetaMLE$SS <- thetaMLE$SS +  regCoef[i+1] * thetaMLE$theta^(i)
+      i <- i-1
+
+    }
+
+    thetaMLE$SS <- thetaMLE$SS + regCoef[i+1]
+    thetaMLE$SS <- round(thetaMLE$SS)
+
+    # rename variable with indicator k
+    names(thetaMLE)[names(thetaMLE) == 'SS'] <- paste("SSk", k, sep = "")
+  }
+  thetaMLE
+}
+
+# MLE
+thetaMLE_A <- read.table("TestData/UShistory_X-sco.txt")[,4]
+thetaMLE_B <- read.table("TestData/UShistory_Y-sco.txt")[,4]
+
+SS_MLE_A <- thetaToSS(thetaMLE_A, convTable_A, itemPara_A)
+SS_MLE_B <- thetaToSS(thetaMLE_B, convTable_B, itemPara_B)
+
+cor(SS_MLE_A$SSk4, SS_MLE_B$SSk7)
+
+
+# EAP
+
+thetaEAP_A <- read.table("TestData/UShistory_X_EAP-sco.txt")[,3]
+thetaEAP_B <- read.table("TestData/UShistory_Y_EAP-sco.txt")[,3]
+
+SS_EAP_A <- thetaToSS(thetaEAP_A, convTable_A, itemPara_A)
+SS_EAP_B <- thetaToSS(thetaEAP_B, convTable_B, itemPara_B)
+
+cor(SS_EAP_A$SSk4, SS_EAP_B$SSk7)
+
+
+
+
 # test help functions ------------------------------------
 NormalQuadraPoints(41)
 LordWingersky(c(0.9,0.9,0.9))
@@ -108,6 +208,12 @@ RelEAPPoly_A_new
 RelEAPPoly_B_new <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "EAP")
 RelEAPPoly_B_new
 
+# method 2
+source("R/RelIRTPoly_2.R")
+RelIRTPoly_2(itemPara_A, convTable_A, 4, "MLE")
+RelIRTPoly_2(itemPara_B, convTable_A, 7, "MLE")
+RelIRTPoly_2(itemPara_A, convTable_A, 4, "EAP")
+RelIRTPoly_2(itemPara_B, convTable_A, 7, "EAP")
 
 
 # method 1

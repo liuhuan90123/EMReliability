@@ -46,6 +46,18 @@ StratCronbachAlpha_A
 StratCronbachAlpha_B <- CronbachAlpha(rawData_B, strat = c(13, 12, 6))
 StratCronbachAlpha_B
 
+# Stratified Feldt CSEM
+
+rawData_A <- read.table("TestData/FormA_31_3000.txt")
+strat_A <-  c(13, 12, 6)
+CSEMStratFeldt(rawData_A, strat_A)
+
+
+rawData_B <- read.table("TestData/FormA_31_3000.txt")
+strat_B <-  c(13, 12, 6)
+CSEMStratFeldt(rawData_B, strat_B)
+
+
 
 
 # UIRT --------------------
