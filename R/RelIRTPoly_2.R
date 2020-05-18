@@ -3,9 +3,10 @@
 #' @description
 #' A function to calculate reliability for Scale Scores using Polynomial Method based on IRT CSEM
 #'
-#' @param itemPara a text file with parameters of sequence b, a, and c on the 1.702 metric
-#' @param convTable a data frame or matrix containing conversion table of raw score,rawScore", and scale score, "roundedSS"
-#' @param K a numeric number indicating selected degree of polynomial regression for SS, default highest degree for cssem is 20
+#' @param itemPara a data frame or matrix with parameters of sequence b, a and c on the 1.702 metric
+#' @param convTable a data frame or matrix containing conversion table of raw score,"rawScore", and scale score, "roundedSS"
+#' @param K highest degree for cssem, with default value 20
+#' @param ks a numeric number indicating selected degree of polynomial regression for SS
 #' @param estType estimation method, MLE or EAP
 #' @return a list containing k value and corresponding reliability coefficient
 #'
@@ -14,12 +15,9 @@
 #' @export
 
 
-RelIRTPoly_2 <- function(itemPara, convTable, ks, estType){
+RelIRTPoly_2 <- function(itemPara, convTable, K = 20, ks, estType){
 
   if (estType == "MLE"){
-
-    # default K
-    K <- 20
 
     # theta and weights
     theta <- NormalQuadraPoints(41)$nodes
@@ -100,9 +98,6 @@ RelIRTPoly_2 <- function(itemPara, convTable, ks, estType){
     return(list("kValue" = RelMLEPolyDat$kValue, "RelMLEPoly" = RelMLEPolyDat$V1))
 
   }else if (estType == "EAP"){
-
-    # default K
-    K <- 20
 
     # theta and weights
     theta <- NormalQuadraPoints(41)$nodes

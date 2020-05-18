@@ -4,7 +4,7 @@
 #' A function to calculate Cronbach's Alpha reliability in CTT
 #'
 #' @param dat a data frame or matrix containing raw data
-#' @return a reliability number
+#' @return Cronbach's Alpha reliability
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
 #'

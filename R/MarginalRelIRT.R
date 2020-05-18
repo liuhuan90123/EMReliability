@@ -1,11 +1,11 @@
-#' @title Marginal Reliability of IRT 2PL: MLE&EAP
+#' @title Marginal Reliability of IRT with MLE or EAP
 #'
 #' @description
-#' A function to calculate marginal reliability of 2PL IRT with MLE&EAP
+#' A function to calculate marginal reliability of unidimensional IRT with MLE or EAP
 #'
-#' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
-#' @param estType estimation method, MLE or EAP
-#' @return a reliability number
+#' @param itemPara a data frame or matrix with parameters of sequence b, a and c on the 1.702 metric
+#' @param estType ability estimation method, MLE or EAP
+#' @return Marginal Reliability of IRT
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
 #'

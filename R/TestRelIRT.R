@@ -3,8 +3,8 @@
 #' @description
 #' A function to calculate test reliability of IRT
 #'
-#' @param itemPara a text file with parameters of sequence b and a, a is on the 1.702 metric
-#' @return a reliability number
+#' @param itemPara a data frame or matrix with parameters of sequence b, a and c on the 1.702 metric
+#' @return test reliability of IRT
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
 #' @export
