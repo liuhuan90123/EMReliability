@@ -50,7 +50,9 @@ TestRelIRT <- function(itemPara){
     info = 1.702**2 * a**2 * P * Q
   })
 
-  ## true score variance
+  ## true score variance approach
+
+  # true score variance
 
   # sum probability by theta
   itemParaAggr <- aggregate(itemParaRep, by=list(Category=itemParaRep$theta), FUN=sum)
@@ -61,14 +63,13 @@ TestRelIRT <- function(itemPara){
   # calculate true score variance
   varianceTrue <- sum((itemParaAggr$P)^2 * itemParaAggr$weights) - (sum(itemParaAggr$P * itemParaAggr$weights))^2
 
-
-  ## error variance
+  # error variance
 
   # claculate error variance
   varianceError <- sum(itemParaAggr$PQ * itemParaAggr$weights)
 
 
-  ## observed score variance
+  ## observed score variance approach
 
   # order by theta
   itemParaRep <- itemParaRep[order(itemParaRep$theta),]
@@ -92,6 +93,11 @@ TestRelIRT <- function(itemPara){
   # transform to data frame
   fxTheta <- as.data.frame(fxTheta)
 
+  # error variance 2
+  varianceError2 <- sum(apply(fxTheta, 1, function(x) sum(x * (c(numOfItem:0) - weighted.mean(c(numOfItem:0), x))^2))*quadPoints$weights)
+
+  # observed score variance
+
   # add quadrature weights
   fxTheta$weights <- quadPoints$weights
 
@@ -110,7 +116,7 @@ TestRelIRT <- function(itemPara){
   varianceObsX <- sum(fxDist$wts * (fxDist$X - weightedMean)^2)
 
   # test reliability
-  TestRelIRT <- 1 - varianceError / varianceObsX # varianceTrue / varianceObsX
+  TestRelIRT <- 1 - varianceError2 / varianceObsX #  = 1 - varianceError / (varianceError + varianceTrue)
 
   # return coefficient
   return(TestRelIRT)
