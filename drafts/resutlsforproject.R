@@ -553,7 +553,7 @@ dev.off()
 
 
 
-# 4 CSSEM Kolen's method ------------------------------------------
+# 6 CSSEM Kolen's method ------------------------------------------
 
 
 plot(cssemKolen_A$trueScaleScore, cssemKolen_A$cssemKolen)
@@ -606,9 +606,7 @@ dev.off()
 
 
 
-
-
-# plot cssem polynomial methodb
+# 5 CSSEM polynomial method ------------------------------------------
 
 # form A
 cssemDat <- CSSEMPolynomial(40, convTable_A_sub, 20)$"CSSEMPolynomial"
@@ -618,6 +616,22 @@ k <- 13 # test, accepted maximum + 1
 cssemDat <- CSSEMPolynomial(40, convTable_B_sub, 20)$"CSSEMPolynomial"
 k <- 13 # test, accepted maximum + 1
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 7/8 CSSEM MLE/EAP polynomial method ------------------------------------------
 
 # plot cssem IRT polynomial method
 
