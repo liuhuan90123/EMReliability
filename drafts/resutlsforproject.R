@@ -379,12 +379,13 @@ names(csemMLE) <- c("theta", "Form", "csemMLE")
 
 png("TestData/csemMLE_AB.png",  width = 799, height = 596)
 
-csemMLE_AB_P <- ggplot(csemMLE, aes(x = theta, y = csemMLE, group = Form, color = Form, shape = Form)) +
+csemMLE_AB_P <- ggplot(csemMLE, aes(x = theta, y = csemMLE, group = Form, shape = Form)) +
   geom_point(size = 2) +
   scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
   scale_y_continuous(name = "CSEM MLE", breaks  = seq(0, 3, 0.5),
                      limits = c(0,3)) +
-  theme_bw()
+  theme_bw() +
+  theme(legend.title=element_blank())
 
 print(csemMLE_AB_P)
 dev.off()
@@ -431,12 +432,13 @@ names(csemEAP) <- c("theta", "Form", "csemEAP")
 
 png("TestData/csemEAP_AB.png",  width = 799, height = 596)
 
-csemEAP_AB_P <- ggplot(csemEAP, aes(x = theta, y = csemEAP, group = Form, color = Form, shape = Form)) +
+csemEAP_AB_P <- ggplot(csemEAP, aes(x = theta, y = csemEAP, group = Form, shape = Form)) +
   geom_point(size = 2) +
   scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
   scale_y_continuous(name = "CSEM EAP", breaks  = seq(0, 1, 0.2),
                      limits = c(0,1)) +
-  theme_bw()
+  theme_bw()+
+  theme(legend.title=element_blank())
 
 print(csemEAP_AB_P)
 dev.off()
@@ -454,8 +456,8 @@ thetaSEMLE_B <- read.table("TestData/UShistory_Y-sco.txt")[,c(4,5)]
 
 # AB
 ggplot() +
-  geom_point(thetaSEMLE_A, mapping = aes(x = V4, y = V5, colour = "Form A"), size = 1.5, shape = 16) +
-  geom_point(thetaSEMLE_B, mapping = aes(x = V4, y = V5, colour = "Form B"), size = 1.5, shape = 17) +
+  geom_point(thetaSEMLE_A, mapping = aes(x = V4, y = V5, shape = "Form A"), size = 1.5) +
+  geom_point(thetaSEMLE_B, mapping = aes(x = V4, y = V5, shape = "Form B"), size = 1.5) +
   scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
   scale_y_continuous(name = "CSEM MLE", breaks  = seq(0, 2, 0.2),
                      limits = c(0,2)) +
@@ -473,8 +475,8 @@ thetaSEEAP_B <- read.table("TestData/UShistory_Y_EAP-sco.txt")[,c(3,4)]
 # AB
 png("TestData/csemEAP_AB_post.png",  width = 799, height = 596)
 csemEAP_pos_AB_P <- ggplot() +
-  geom_point(thetaSEEAP_A, mapping = aes(x = V3, y = V4,  colour = "Form A"), size = 1.5) +
-  geom_point(thetaSEEAP_B, mapping = aes(x = V3, y = V4,  colour = "Form B"), size = 1.5) +
+  geom_point(thetaSEEAP_A, mapping = aes(x = V3, y = V4,  shape = "Form A"), size = 1.5) +
+  geom_point(thetaSEEAP_B, mapping = aes(x = V3, y = V4,  shape = "Form B"), size = 1.5) +
   scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
   scale_y_continuous(name = "CSEM EAP", breaks  = seq(0, 1, 0.2),
                      limits = c(0,1)) +
@@ -538,8 +540,8 @@ dev.off()
 # AB
 png("TestData/CSSEM_Binomial_AB.png",  width = 799, height = 596)
 CSSEM_Binomial_AB <- ggplot() +
-  geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  colour = "Form A"), size = 2) +
-  geom_point(cssemBinomial_B_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  colour = "Form B"), size = 2) +
+  geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "Form A"), size = 2) +
+  geom_point(cssemBinomial_B_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "Form B"), size = 2) +
   scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
   scale_y_continuous(name = "CSSEM Binomial Method", breaks  = seq(0, 3, 0.5),
                      limits = c(0,3)) +
@@ -550,6 +552,44 @@ print(CSSEM_Binomial_AB)
 dev.off()
 
 
+# 5 CSSEM polynomial method ------------------------------------------
+
+# form A
+cssemDat_A <- CSSEMPolynomial(40, convTable_A_sub, 20)$"CSSEMPolynomial"
+k <- 13 # test, accepted maximum + 1
+
+# form B
+cssemDat_B <- CSSEMPolynomial(40, convTable_B_sub, 20)$"CSSEMPolynomial"
+k <- 13 # test, accepted maximum + 1
+
+
+# many to one aggr
+cssemDat_A <- as.data.frame(cssemDat_A)
+cssemDat_B <- as.data.frame(cssemDat_B)
+
+cssemDat_A_Aggre <- aggregate(cssemDat_A$cssemPolyk3, by=list(Category=cssemDat_A$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+cssemDat_B_Aggre <- aggregate(cssemDat_B$cssemPolyk3, by=list(Category=cssemDat_B$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+names(cssemDat_A_Aggre) <- names(cssemDat_B_Aggre) <- c("roundedSS", "cssemPolyk3")
+
+plot(cssemDat_A_Aggre$roundedSS, cssemDat_A_Aggre$cssemPolyk3)
+plot(cssemDat_B_Aggre$roundedSS, cssemDat_B_Aggre$cssemPolyk3)
+
+
+
+# AB
+png("TestData/CSSEM_Polynomial_AB.png",  width = 799, height = 596)
+CSSEM_Polynomial_AB <- ggplot() +
+  geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "Form A"), size = 2) +
+  geom_point(cssemDat_B_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "Form B"), size = 2) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(CSSEM_Polynomial_AB)
+dev.off()
 
 
 
@@ -592,8 +632,8 @@ dev.off()
 # AB
 png("TestData/CSSEM_KolenIRT_AB.png",  width = 799, height = 596)
 CSSEM_KolenIRT_AB <- ggplot() +
-  geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  colour = "Form A"), size = 2) +
-  geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  colour = "Form B"), size = 2) +
+  geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form A"), size = 2) +
+  geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
                      limits = c(0,3)) +
@@ -605,47 +645,115 @@ dev.off()
 
 
 
-
-# 5 CSSEM polynomial method ------------------------------------------
-
-# form A
-cssemDat <- CSSEMPolynomial(40, convTable_A_sub, 20)$"CSSEMPolynomial"
-k <- 13 # test, accepted maximum + 1
-
-# form B
-cssemDat <- CSSEMPolynomial(40, convTable_B_sub, 20)$"CSSEMPolynomial"
-k <- 13 # test, accepted maximum + 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # 7/8 CSSEM MLE/EAP polynomial method ------------------------------------------
 
 # plot cssem IRT polynomial method
 
 # CSSEM IRT MLE Polynomial
-cssemDat <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")$"CSSEMPolyMLE"
+cssemDat_MLE_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")$"CSSEMPolyMLE"
 k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
-cssemDat <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")$"CSSEMPolyMLE"
+cssemDat_MLE_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")$"CSSEMPolyMLE"
 k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
 
+
+# many to one aggr
+cssemDat_MLE_A <- as.data.frame(cssemDat_MLE_A)
+cssemDat_MLE_B <- as.data.frame(cssemDat_MLE_B)
+
+cssemDat_MLE_A_Aggre <- aggregate(cssemDat_MLE_A$cssemPolyk4, by=list(Category=cssemDat_MLE_A$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+cssemDat_MLE_B_Aggre <- aggregate(cssemDat_MLE_B$cssemPolyk7, by=list(Category=cssemDat_MLE_B$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+names(cssemDat_MLE_A_Aggre) <- names(cssemDat_MLE_B_Aggre) <- c("roundedSS", "cssemPoly")
+
+plot(cssemDat_MLE_A_Aggre$roundedSS, cssemDat_MLE_A_Aggre$cssemPoly)
+plot(cssemDat_MLE_B_Aggre$roundedSS, cssemDat_MLE_B_Aggre$cssemPoly)
+
+
+
+# AB
+png("TestData/CSSEM_Polynomial_MLE_AB.png",  width = 799, height = 596)
+CSSEM_Polynomial_MLE_AB <- ggplot() +
+  geom_point(cssemDat_MLE_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "Form A"), size = 2) +
+  geom_point(cssemDat_MLE_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "Form B"), size = 2) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM MLE Polynomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(CSSEM_Polynomial_MLE_AB)
+dev.off()
+
+
+
+
 # CSSEM IRT EAP Polynomial
-cssemDat <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP")$"CSSEMPolyEAP"
+cssemDat_EAP_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP")$"CSSEMPolyEAP"
 k <- 10 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
-cssemDat <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")$"CSSEMPolyEAP"
+cssemDat_EAP_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")$"CSSEMPolyEAP"
 k <- 5 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+
+
+# many to one aggr
+cssemDat_EAP_A <- as.data.frame(cssemDat_EAP_A)
+cssemDat_EAP_B <- as.data.frame(cssemDat_EAP_B)
+
+cssemDat_EAP_A_Aggre <- aggregate(cssemDat_EAP_A$cssemPolyk4, by=list(Category=cssemDat_EAP_A$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+cssemDat_EAP_B_Aggre <- aggregate(cssemDat_EAP_B$cssemPolyk7, by=list(Category=cssemDat_EAP_B$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+names(cssemDat_EAP_A_Aggre) <- names(cssemDat_EAP_B_Aggre) <- c("roundedSS", "cssemPoly")
+
+plot(cssemDat_EAP_A_Aggre$roundedSS, cssemDat_EAP_A_Aggre$cssemPoly)
+plot(cssemDat_EAP_B_Aggre$roundedSS, cssemDat_EAP_B_Aggre$cssemPoly)
+
+
+
+# AB
+png("TestData/CSSEM_Polynomial_EAP_AB.png",  width = 799, height = 596)
+CSSEM_Polynomial_EAP_AB <- ggplot() +
+  geom_point(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "Form A"), size = 2) +
+  geom_point(cssemDat_EAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "Form B"), size = 2) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM EAP Polynomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(CSSEM_Polynomial_EAP_AB)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -701,17 +809,6 @@ CSSEM_poly_B_P <- ggplot(cssemDatLong, aes(x = cssemPolyk1.Category, y = cssempo
 
 print(CSSEM_poly_B_P)
 dev.off()
-
-
-
-
-
-
-
-
-
-
-
 
 
 

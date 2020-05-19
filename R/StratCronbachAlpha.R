@@ -4,7 +4,7 @@
 #' A function to calculate Stratified Cronbach's Alpha reliability in CTT
 #'
 #' @param dat a data frame or matrix containing raw data
-#' @param strat a vector containing number of item for each strat
+#' @param strat a vector containing number of items for each strat
 #' @return a reliability number
 #'
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
