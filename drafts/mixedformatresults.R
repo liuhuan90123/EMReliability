@@ -84,6 +84,25 @@ MarginalRelEAP_B <- MarginalRelIRT(itemPara_B_UIRT, "EAP")
 MarginalRelEAP_B
 
 
+# Kolen's method
+
+# read conversion tables
+convTable_A <- read.csv("TestData/conversion_table_Form A.csv")
+convTable_A <- convTable_A[1:32, c("RawScore", "roundedSS")]
+
+convTable_B <- read.csv("TestData/conversion_table_Form B.csv")
+convTable_B <- convTable_B[1:32, c("RawScore", "roundedSS")]
+
+
+KolenRelIRT_A_UIRT <- KolenRelIRT(itemPara_A_UIRT, convTable_A)
+KolenRelIRT_A_UIRT
+
+KolenRelIRT_B_UIRT <- KolenRelIRT(itemPara_B_UIRT, convTable_B)
+KolenRelIRT_B_UIRT
+
+
+
+
 
 # BI-Factor General
 
@@ -113,7 +132,7 @@ TestRelIRT(itemPara_BF_G)
 MarginalRelIRT(itemPara_BF_G, estType = "MLE")
 MarginalRelIRT(itemPara_BF_G, estType = "EAP")
 
-
+KolenRelIRT(itemPara_BF_G, convTable_B)
 
 # Simple Structure 3 factors --------------------------------
 

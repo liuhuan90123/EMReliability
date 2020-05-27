@@ -29,6 +29,10 @@ library(EMReliability)
 rawData_A <- read.table("TestData/RawDataFormX.txt")
 rawData_B <- read.table("TestData/RawDataFormY.txt")
 
+sum(diag(cov(rawData_A)))
+
+
+
 # read item parameters from txt file
 itemPara_A <- read.table("TestData/ItemParaFormX.txt")
 names(itemPara_A) <- c("b", "a")
@@ -189,6 +193,15 @@ MarginalRelEAP_B <- MarginalRelIRT(itemPara_B, "EAP")
 MarginalRelEAP_B
 
 # Kolen's method
+
+# read conversion tables
+convTable_A <- read.csv("TestData/ConversionTableFormX.csv")
+convTable_A$roundedSS <- round(convTable_A$unroundedSS)
+
+convTable_B <- read.csv("TestData/ConversionTableFormY.csv")
+convTable_B$roundedSS <- round(convTable_B$unroundedSS)
+
+
 KolenRelIRT_A <- KolenRelIRT(itemPara_A, convTable_A)
 KolenRelIRT_A
 
@@ -233,8 +246,8 @@ RelEAPPoly_B
 ## EAP theta
 
 
-EAPTheta(itemPara_A, rawData_A)
-EAPTheta(itemPara_B, rawData_B)
+# EAPTheta(itemPara_A, rawData_A)
+# EAPTheta(itemPara_B, rawData_B)
 
 # EAP <- merge(as.data.frame(RelEAPPoly_A), as.data.frame(RelEAPPoly_B), by = "kValue")
 # EAP <- merge(EAP, as.data.frame(RelMLEPoly_B),  by = "kValue")
@@ -489,6 +502,62 @@ dev.off()
 
 
 
+### 23 for each form ----------------------------------------------------------
+
+png("TestData/CSSEM_Theta_A.png",  width = 799, height = 596)
+SEM_Theta_A <- ggplot() +
+  geom_point(csemMLE_A, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information"), size = 2) +
+  geom_point(csemEAP_A, mapping = aes(x = theta, y = csemEAP,  shape = "CSEM EAP Information"), size = 2) +
+  geom_point(thetaSEEAP_A, mapping = aes(x = V3, y = V4,  shape = "CSEM EAP Posterior"), size = 2) +
+  geom_line(csemMLE_A, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information"), size = 0.6) +
+  geom_line(csemEAP_A, mapping = aes(x = theta, y = csemEAP,  shape = "CSEM EAP Information"), size = 0.6) +
+  geom_line(thetaSEEAP_A, mapping = aes(x = V3, y = V4,  shape = "CSEM EAP Posterior"), size = 0.6) +
+  scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+  scale_y_continuous(name = "CSEM", breaks  = seq(0, 2.5, 0.5),
+                     limits = c(0,2.5)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(SEM_Theta_A)
+dev.off()
+
+png("TestData/CSSEM_Theta_B.png",  width = 799, height = 596)
+SEM_Theta_B <- ggplot() +
+  geom_point(csemMLE_B, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information"), size = 2) +
+  geom_point(csemEAP_B, mapping = aes(x = theta, y = csemEAP,  shape = "CSEM EAP Information"), size = 2) +
+  geom_point(thetaSEEAP_B, mapping = aes(x = V3, y = V4,  shape = "CSEM EAP Posterior"), size = 2) +
+  geom_line(csemMLE_B, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information"), size = 0.6) +
+  geom_line(csemEAP_B, mapping = aes(x = theta, y = csemEAP,  shape = "CSEM EAP Information"), size = 0.6) +
+  geom_line(thetaSEEAP_B, mapping = aes(x = V3, y = V4,  shape = "CSEM EAP Posterior"), size = 0.6) +
+  scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+  scale_y_continuous(name = "CSEM", breaks  = seq(0, 2.5, 0.5),
+                     limits = c(0,2.5)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(SEM_Theta_B)
+dev.off()
+
+
+# png("TestData/CSSEM_Theta_B.png",  width = 799, height = 596)
+# SEM_Theta_B <- ggplot() +
+#   geom_point(csemMLE_A, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information", colour = "CSEM MLE Information"), size = 2) +
+#   geom_point(csemEAP_A, mapping = aes(x = theta, y = csemEAP,  shape = "CSEM EAP Information", colour = "CSEM EAP Information"), size = 2) +
+#   geom_point(thetaSEEAP_A, mapping = aes(x = V3, y = V4,  shape = "CSEM EAP Posterior", colour = "CSEM EAP Posterior"), size = 2) +
+#   geom_line(csemMLE_A, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information", colour = "CSEM MLE Information"), size = 0.6) +
+#   geom_line(csemEAP_A, mapping = aes(x = theta, y = csemEAP,  shape = "CSEM EAP Information", colour = "CSEM EAP Information"), size = 0.6) +
+#   geom_line(thetaSEEAP_A, mapping = aes(x = V3, y = V4,  shape = "CSEM EAP Posterior", colour = "CSEM EAP Posterior"), size = 0.6) +
+#   scale_x_continuous(name = "Theta", breaks  = seq(-5, 5, 1)) +
+#   scale_y_continuous(name = "CSEM", breaks  = seq(0, 2.5, 0.5),
+#                      limits = c(0,2.5)) +
+#   theme_bw() +
+#   theme(legend.title=element_blank())
+#
+# print(SEM_Theta_B)
+# dev.off()
+
+
+
 # 4 CSSEM Binomial ------------------------------------------
 
 
@@ -645,6 +714,121 @@ dev.off()
 
 
 
+
+
+### 456 for each form ----------------------------------------------------------
+
+
+
+# png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
+# SSEM_SSX_A <- ggplot() +
+#   geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 2) +
+#   geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 2) +
+#   geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 2) +
+#   # geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
+#   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
+#   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
+#                      limits = c(0,3)) +
+#   theme_bw() +
+#   theme(legend.title=element_blank())
+#
+# print(SSEM_SSX_A)
+# dev.off()
+#
+#
+#
+# png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
+# SSEM_SSX_A <- ggplot() +
+#   geom_line(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 1) +
+#   geom_line(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 1) +
+#   geom_line(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 1) +
+#   # geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
+#   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
+#   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
+#                      limits = c(0,3)) +
+#   theme_bw() +
+#   theme(legend.title=element_blank())
+#
+# print(SSEM_SSX_A)
+# dev.off()
+#
+#
+#
+# png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
+# SSEM_SSX_A <- ggplot() +
+#   geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 2) +
+#   geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 2) +
+#   geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 2) +
+#   geom_line(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 1) +
+#   geom_line(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 1) +
+#   geom_line(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 1) +
+#   # geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
+#   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
+#   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
+#                      limits = c(0,3)) +
+#   theme_bw() +
+#   theme(legend.title=element_blank())
+#
+# print(SSEM_SSX_A)
+# dev.off()
+
+# point + line + bw
+png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
+SSEM_SSX_A <- ggplot() +
+  geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 2) +
+  geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "CSSEM Polynomial Method"), size = 2) +
+  geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "CSSEM Binomial Method"), size = 2) +
+  geom_line(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 0.6) +
+  geom_line(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "CSSEM Polynomial Method"), size = 0.6) +
+  geom_line(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "CSSEM Binomial Method"), size = 0.6) +
+  scale_x_continuous(name = "Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(SSEM_SSX_A)
+dev.off()
+
+
+png("TestData/CSSEM_SSX_B.png",  width = 799, height = 596)
+SSEM_SSX_B <- ggplot() +
+  geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 2) +
+  geom_point(cssemDat_B_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "CSSEM Polynomial Method"), size = 2) +
+  geom_point(cssemBinomial_B_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "CSSEM Binomial Method"), size = 2) +
+  geom_line(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 0.6) +
+  geom_line(cssemDat_B_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "CSSEM Polynomial Method"), size = 0.6) +
+  geom_line(cssemBinomial_B_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "CSSEM Binomial Method"), size = 0.6) +
+  scale_x_continuous(name = "Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(SSEM_SSX_B)
+dev.off()
+
+
+# point  + bw
+png("TestData/CSSEM_SSX_A_noline.png",  width = 799, height = 596)
+SSEM_SSX_A_noline <- ggplot() +
+  geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 2) +
+  geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "CSSEM Polynomial Method"), size = 2) +
+  geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "CSSEM Binomial Method"), size = 2) +
+  # geom_line(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 1) +
+  # geom_line(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "CSSEM Polynomial Method"), size = 1) +
+  # geom_line(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "CSSEM Binomial Method"), size = 1) +
+  scale_x_continuous(name = "Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
+
+print(SSEM_SSX_A_noline)
+dev.off()
+
+
+
 # 7/8 CSSEM MLE/EAP polynomial method ------------------------------------------
 
 # plot cssem IRT polynomial method
@@ -723,24 +907,40 @@ print(CSSEM_Polynomial_EAP_AB)
 dev.off()
 
 
+## 78 for each form --------------------------
 
+# Form A
 
+png("TestData/CSSEM_Polynomial_SSTheta_A.png",  width = 799, height = 596)
+CSSEM_Polynomial_SSTheta_A <- ggplot() +
+  geom_point(cssemDat_MLE_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 2) +
+  geom_point(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 2) +
+  geom_line(cssemDat_MLE_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 0.6) +
+  geom_line(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 0.6) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 4.5, 0.5),
+                     limits = c(0,4.5)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
 
+print(CSSEM_Polynomial_SSTheta_A)
+dev.off()
 
+# Form A
+png("TestData/CSSEM_Polynomial_SSTheta_B.png",  width = 799, height = 596)
+CSSEM_Polynomial_SSTheta_B <- ggplot() +
+  geom_point(cssemDat_MLE_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 2) +
+  geom_point(cssemDat_EAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 2) +
+  geom_line(cssemDat_MLE_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 0.6) +
+  geom_line(cssemDat_EAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 0.6) +
+  scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
+  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 4.5, 0.5),
+                     limits = c(0,4.5)) +
+  theme_bw() +
+  theme(legend.title=element_blank())
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(CSSEM_Polynomial_SSTheta_B)
+dev.off()
 
 
 
@@ -911,3 +1111,27 @@ ggplot(prd, aes(x = rawScore, y = predictedSS)) +
 
 
 
+
+
+# fitted line
+
+library(ggplot2)
+
+K = 5
+for (k in 1:K){
+
+  modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
+  prd <- data.frame(rawScore = seq(from = range(cssemDat$rawScore)[1], to = range(cssemDat$rawScore)[2], length.out = 100))
+  prd$predictedSS <- predict(modelK, newdata = prd, se.modelK = TRUE)
+
+  p <- ggplot(prd, aes(x = rawScore, y = predictedSS)) +
+    theme_bw() +
+    geom_line() +
+    geom_point(data = cssemDat, aes(x = rawScore, y = roundedSS)) +
+    scale_y_continuous(name = "Scale Score", breaks  = seq(100, 130, 5)) +
+    scale_x_continuous(name = "Raw Score") +
+    ggtitle(paste("k = ", k, sep = ""))
+
+  print(p)
+
+}

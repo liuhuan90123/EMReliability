@@ -12,7 +12,7 @@
 #'
 #' @export
 
-PolynomialMethod <- function(cssemDat, K){
+PolynomialMethod <- function(cssemDat, K, gra = TRUE){
 
   # create data frame to store r square
   rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
@@ -32,10 +32,29 @@ PolynomialMethod <- function(cssemDat, K){
     # check whether regression coefficient of highest order is missing
     if(is.na(regCoef[k+1])){
 
-      message(paste("The maximum k accepted is", k-1, sep = " "))
+      message(paste("The maximum k accepted is", k-1, ".", sep = " "))
 
       break
 
+    }
+
+    # graph
+    if(gra == TRUE){
+
+      #modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
+      prd <- data.frame(rawScore = seq(from = range(cssemDat$rawScore)[1], to = range(cssemDat$rawScore)[2], length.out = 100))
+      prd$predictedSS <- predict(modelK, newdata = prd, se.modelK = TRUE)
+
+      p <- ggplot(prd, aes(x = rawScore, y = predictedSS)) +
+        theme_bw() +
+        geom_line() +
+        geom_point(data = cssemDat, aes(x = rawScore, y = roundedSS)) +
+        scale_y_continuous(name = "Scale Score") +
+        scale_x_continuous(name = "Raw Score") +
+        ggtitle(paste("Polynomial Method Fitted Line with k = ", k, sep = "")) +
+        theme(plot.title = element_text(hjust = 0.5))
+
+      print(p)
     }
 
     # calculate transformation coefficients fx: from 1 to K
@@ -51,11 +70,31 @@ PolynomialMethod <- function(cssemDat, K){
 
     cssemDat$fx <- cssemDat$fx + regCoef[i+1]
 
+
+
+    # if(any(is.na(cssemDat$fx))){
+    #   message(paste("Negative transformation coefficients exist when k = ", k, ". They will be corrected to 0.", sep = " "))
+    #
+    # }
+
+
     # calculate cssem using polynomial method
-    cssemDat$cssemPoly <- cssemDat$fx * cssemDat$csem
+    cssemDat$cssemPoly <- sqrt(cssemDat$fx * (cssemDat$csem)^2)
+
+    # check negative values
+    negCount <- sum(cssemDat$fx < 0)
+
+    if(negCount > 0){
+      message(paste("Negative transformation coefficient exits when k = ", k,
+                    ". The corresponding CSSEM will be corrected to 0.", sep = " "))
+
+      cssemDat$cssemPoly[cssemDat$fx < 0] <- 0
+
+    }
 
     # rename variable with indicator k
     names(cssemDat)[names(cssemDat) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
+    names(cssemDat)[names(cssemDat) == 'fx'] <- paste("fxk", k, sep = "")
 
   }
 
