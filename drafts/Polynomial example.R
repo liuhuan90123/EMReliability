@@ -33,26 +33,46 @@ convTable_B_Poly <- convTable_B[,c("theta", "roundedSS")]
 
 # CSSEM Polynomial Lord
 
-cssemPolynomial_A <- CSSEMPolynomial(numOfItem = 40, convTable_A_sub, 20)
+cssemPolynomial_A <- CSSEMPolynomial(numOfItem = 40, convTable_A_sub, 10)
 cssemPolynomial_A
-cssemPolynomial_B <- CSSEMPolynomial(numOfItem = 40, convTable_B_sub, 20)
+cssemPolynomial_B <- CSSEMPolynomial(numOfItem = 40, convTable_B_sub, 10)
 cssemPolynomial_B
 
+dat <- as.data.frame(cssemPolynomial_A$CSSEMPolynomial)
+ggplot(dat, mapping = aes(x = rawScore, y = fxk3)) +
+  geom_point()
 
+
+dat2 <- as.data.frame(cssemPolynomial_A$CSSEMPolynomial)
+ggplot(dat, mapping = aes(x = rawScore, y = fxk3)) +
+  geom_point()
 
 # CSSEM Polynomial MLE
 
-cssemDat_MLE_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")
+cssemDat_MLE_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 10, "MLE")
 cssemDat_MLE_A
-cssemDat_MLE_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")
+cssemDat_MLE_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 10, "MLE")
 cssemDat_MLE_B
 
-# CSSEM Polynomial MLE
+rawFreq <- as.data.frame(table(rowSums(rawData_A)))
+names(rawFreq) <- c("rawScore", "freq")
+rawFreq$wt <- rawFreq$freq / sum(rawFreq$freq)
 
-cssemDat_MLE_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP")
-cssemDat_MLE_A
-cssemDat_MLE_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")
-cssemDat_MLE_B
+
+
+datN <- cssemDat_MLE_A$CSSEMPolyMLE
+datN$wt <- c(0,0,0,rawFreq$wt)
+
+SSVar <- sum(datN$wt * (datN$SSk4 - weighted.mean(datN$SSk4, datN$wt))^2)
+errVar <- sum(datN$cssemPolyk4^2 * datN$wt)
+1 - errVar/SSVar
+
+# CSSEM Polynomial EAP
+
+cssemDat_EAP_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 10, "EAP")
+cssemDat_EAP_A
+cssemDat_EAP_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 10, "EAP")
+cssemDat_EAP_B
 
 
 

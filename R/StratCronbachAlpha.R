@@ -42,5 +42,3 @@ StratCronbachAlpha <- function(dat, strat){
 }
 
 
-
-CSEMStratFeldt

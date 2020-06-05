@@ -108,15 +108,15 @@ KolenRelIRT_B_UIRT
 
 # read item parameters
 # form A
-# itemPara_BF_G <- read.table("TestData/SpanishLit_prm_A_BF.txt")[,c(7:11)]
+itemPara_BF_G <- read.table("TestData/SpanishLit_prm_A_BF.txt")[,c(7:11)]
 
 # form B
-itemPara_BF_G <- read.table("TestData/SpanishLit_prm_B_BF.txt")[,c(7:11)]
+# itemPara_BF_G <- read.table("TestData/SpanishLit_prm_B_BF.txt")[,c(7:11)]
 
 names(itemPara_BF_G) <- c("b", "ag","a1","a2", "a3") # a1 is primary
 itemPara_BF_G$a <- c(itemPara_BF_G$a1[1:13], itemPara_BF_G$a2[14:25], itemPara_BF_G$a3[26:31])
 
-itemPara_BF_G[,"b"] <- -itemPara_BF_G[,"b"]/(itemPara_BF_G[,"ag"] + itemPara_BF_G[,"a"]) #######?????????????????
+itemPara_BF_G[,"b"] <- -itemPara_BF_G[,"b"]/(itemPara_BF_G[,"ag"]) #######+ itemPara_BF_G[,"a"]
 itemPara_BF_G[,"a"] <- itemPara_BF_G[,"a"]/1.702
 
 itemPara_BF_G$a1[1:13] <- itemPara_BF_G$a[1:13]
@@ -129,10 +129,9 @@ names(itemPara_BF_G) <- c("b", "a")
 
 
 TestRelIRT(itemPara_BF_G)
-MarginalRelIRT(itemPara_BF_G, estType = "MLE")
-MarginalRelIRT(itemPara_BF_G, estType = "EAP")
 
-KolenRelIRT(itemPara_BF_G, convTable_B)
+KolenRelIRT(itemPara_BF_G, convTable_A)
+# KolenRelIRT(itemPara_BF_G, convTable_B)
 
 # Simple Structure 3 factors --------------------------------
 
@@ -196,6 +195,64 @@ MarginalRelSSMIRT_D_MLE(itemPara_SS_A, corvec_A, strat)
 MarginalRelSSMIRT_D_MLE(itemPara_SS_B, corvec_B, strat)
 
 # marginal reliability EAP
+
+
+
+# num of quadratures
+numOfQuad <- 41
+
+### bivariate normal distribution
+
+nodes <- seq(-4, 4, length.out = numOfQuad)
+nodesM <- as.matrix(expand.grid(nodes,nodes))
+weightsUnwtd <- dmvnorm(nodesM, c(0,0), cormat, log=FALSE) # mvtnorm
+nodesM <- as.data.frame(nodesM)
+nodesM$weightsWtd <- weightsUnwtd #/ sum(weightsUnwtd)
+nodesM$weightsWtd <- round(nodesM$weightsWtd, 10)
+
+write.table(format(nodesM, digits=10), "thetatwo.txt", col.names = F, row.names = F, quote = F)
+
+
+### trivariate normal distribution
+
+
+
+# set nodes and weights
+nodes <- seq(-4, 4, length.out = numOfQuad)
+nodesM <- as.matrix(expand.grid(nodes,nodes,nodes))
+weightsUnwtd <- dmvnorm(nodesM, c(0,0,0), cormat_A, log=FALSE) # mvtnorm
+nodesM <- as.data.frame(nodesM)
+nodesM$weightsWtd <- weightsUnwtd #/ sum(weightsUnwtd)
+
+
+# nodesM <- nodesM[,c("Var3", "Var2", "Var1", "weightsWtd")]
+
+nodesM$Var3 <- format(nodesM$Var3, scientific = FALSE)
+nodesM$Var2 <- format(nodesM$Var2, scientific = FALSE)
+nodesM$Var1 <- format(nodesM$Var1, scientific = FALSE)
+nodesM$weightsWtd <- round(nodesM$weightsWtd, 10)
+
+write.table(format(nodesM, digits=10), "thetathreeformA.txt", col.names = F, row.names = F, quote = F)
+
+
+
+
+# set nodes and weights
+nodes <- seq(-4, 4, length.out = numOfQuad)
+nodesM <- as.matrix(expand.grid(nodes,nodes,nodes))
+weightsUnwtd <- dmvnorm(nodesM, c(0,0,0), cormat_B, log=FALSE) # mvtnorm
+nodesM <- as.data.frame(nodesM)
+nodesM$weightsWtd <- weightsUnwtd #/ sum(weightsUnwtd)
+
+
+# nodesM <- nodesM[,c("Var3", "Var2", "Var1", "weightsWtd")]
+
+nodesM$Var3 <- format(nodesM$Var3, scientific = FALSE)
+nodesM$Var2 <- format(nodesM$Var2, scientific = FALSE)
+nodesM$Var1 <- format(nodesM$Var1, scientific = FALSE)
+nodesM$weightsWtd <- round(nodesM$weightsWtd, 10)
+
+write.table(format(nodesM, digits=10), "thetathreeformB.txt", col.names = F, row.names = F, quote = F)
 
 
 

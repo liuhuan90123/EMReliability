@@ -43,19 +43,18 @@ nodes <- seq(-4, 4, length.out = 41)
 nodesM <- as.matrix(expand.grid(nodes,nodes,nodes))
 weightsUnwtd <- dmvn(nodesM, c(0,0,0), cormat_A, log=FALSE)
 nodesM <- as.data.frame(nodesM)
-nodesM$weightsWtd <- weightsUnwtd# / sum(weightsUnwtd)
+nodesM$weightsWtd <- weightsUnwtd # / sum(weightsUnwtd)
 
 nodesM <- nodesM[,c("Var3", "Var2", "Var1", "weightsWtd")]
 
 nodesM$Var3 <- format(nodesM$Var3, scientific = FALSE)
 nodesM$Var2 <- format(nodesM$Var2, scientific = FALSE)
 nodesM$Var1 <- format(nodesM$Var1, scientific = FALSE)
-# nodesM$weightsWtd <- format(nodesM$weightsWtd, scientific = FALSE)
 nodesM$weightsWtd <- round(nodesM$weightsWtd, 10)
 
 # options(scipen=10)
 
-write.table(nodesM, "thetathreeformA_wtd.txt", col.names = F, row.names = F, quote = F)
+write.table(nodesM, "thetathreeformA.txt", col.names = F, row.names = F, quote = F)
 
 
 # item parameters

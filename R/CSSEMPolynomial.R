@@ -5,7 +5,7 @@
 #'
 #' @param numOfItem a numeric number indicating number of items
 #' @param convTable a data frame or matrix containing conversion table of raw score to scale score
-#' @param K a numeric number indicating highest degree of polynomial regression
+#' @param K a numeric number indicating highest degree of polynomial regression, 10 in default
 #'
 #' @return a data frame containing CSSEM using Polynomial Method
 #'
@@ -13,7 +13,7 @@
 #'
 #' @export
 
-CSSEMPolynomial <- function(numOfItem, convTable, K){
+CSSEMPolynomial <- function(numOfItem, convTable, K = 10){
 
   # csem Lord
   csemLordDat <- CSEMLord(numOfItem)

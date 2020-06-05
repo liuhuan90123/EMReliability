@@ -136,6 +136,7 @@ marginalRelMAPNice
 
 
 
+
 # marginal reliability MLE
 MarginalRelMLE_A <- MarginalRelIRT_2(itemPara_A, "MLE")
 MarginalRelMLE_A

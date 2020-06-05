@@ -4,7 +4,7 @@
 #' A function to implement polynomial method in calculating CSSEM
 #'
 #' @param cssemDat a data frame or matrix containing conversion table of raw score to scale score, and csem of raw score
-#' @param K degree of polynomial regression
+#' @param K a numeric number indicating highest degree of polynomial regression, 10 in default
 #'
 #' @return a data frame containing CSSEM using Polynomial Method using different k values
 #'
@@ -12,7 +12,7 @@
 #'
 #' @export
 
-PolynomialMethod <- function(cssemDat, K, gra = TRUE){
+PolynomialMethod <- function(cssemDat, K = 10, gra = TRUE){
 
   # create data frame to store r square
   rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
@@ -41,7 +41,6 @@ PolynomialMethod <- function(cssemDat, K, gra = TRUE){
     # graph
     if(gra == TRUE){
 
-      #modelK <- lm(roundedSS ~ poly(rawScore, k, raw=TRUE), cssemDat)
       prd <- data.frame(rawScore = seq(from = range(cssemDat$rawScore)[1], to = range(cssemDat$rawScore)[2], length.out = 100))
       prd$predictedSS <- predict(modelK, newdata = prd, se.modelK = TRUE)
 
@@ -70,31 +69,37 @@ PolynomialMethod <- function(cssemDat, K, gra = TRUE){
 
     cssemDat$fx <- cssemDat$fx + regCoef[i+1]
 
+    # calculate SS: from 1 to K
+    cssemDat$SS <- 0
+    i <- k
 
+    while(i > 0){
 
-    # if(any(is.na(cssemDat$fx))){
-    #   message(paste("Negative transformation coefficients exist when k = ", k, ". They will be corrected to 0.", sep = " "))
-    #
-    # }
+      cssemDat$SS <- cssemDat$SS +  regCoef[i+1] * cssemDat$rawScore^(i)
+      i <- i-1
 
+    }
+
+    cssemDat$SS <- cssemDat$SS + regCoef[i+1]
+    cssemDat$SS <- round(cssemDat$SS)
 
     # calculate cssem using polynomial method
-    cssemDat$cssemPoly <- sqrt(cssemDat$fx * (cssemDat$csem)^2)
+    cssemDat$cssemPoly <- cssemDat$fx * (cssemDat$csem)
 
     # check negative values
     negCount <- sum(cssemDat$fx < 0)
 
     if(negCount > 0){
-      message(paste("Negative transformation coefficient exits when k = ", k,
-                    ". The corresponding CSSEM will be corrected to 0.", sep = " "))
+      message(paste("Negative transformation coefficient exists when k = ", k,
+                    ". The corresponding CSSEM will not be available.", sep = " "))
 
-      cssemDat$cssemPoly[cssemDat$fx < 0] <- 0
-
+      cssemDat$cssemPoly[cssemDat$fx<0] <- NA
     }
 
     # rename variable with indicator k
     names(cssemDat)[names(cssemDat) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
     names(cssemDat)[names(cssemDat) == 'fx'] <- paste("fxk", k, sep = "")
+    names(cssemDat)[names(cssemDat) == 'SS'] <- paste("SSk", k, sep = "")
 
   }
 

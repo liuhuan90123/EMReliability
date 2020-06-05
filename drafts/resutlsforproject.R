@@ -1,4 +1,4 @@
-
+options(max.print=1000000)
 ### Results for project ------------------
 
 # source("R/NormalQuadraPoints.R") # n set as 41
@@ -208,39 +208,18 @@ KolenRelIRT_A
 KolenRelIRT_B <- KolenRelIRT(itemPara_B, convTable_B)
 KolenRelIRT_B
 
-# method 3
-source("R/RelIRTPoly_new.R") # itemPara
-# Reliability for rounded SS using polynomial method
-RelMLEPoly_A_new <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "MLE")
-RelMLEPoly_A_new
-RelMLEPoly_B_new <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "MLE")
-RelMLEPoly_B_new
-
-RelEAPPoly_A_new <- RelIRTPoly_new(itemPara_A, convTable_A_Poly, 20, "EAP")
-RelEAPPoly_A_new
-RelEAPPoly_B_new <- RelIRTPoly_new(itemPara_B, convTable_B_Poly, 20, "EAP")
-RelEAPPoly_B_new
-
+# Polynomial method reliability for EAP and MLE
 # method 2
-source("R/RelIRTPoly_2.R")
-RelIRTPoly_2(itemPara_A, convTable_A, 20, 4, "MLE")
-RelIRTPoly_2(itemPara_B, convTable_A, 20, 7, "MLE")
-RelIRTPoly_2(itemPara_A, convTable_A, 20, 4, "EAP")
-RelIRTPoly_2(itemPara_B, convTable_A, 20, 7, "EAP")
+source("R/RelIRTPoly.R")
+RelIRTPoly_MLE_A <- RelIRTPoly(itemPara_A, convTable_A, 10, "MLE")
+RelIRTPoly_MLE_A
+RelIRTPoly_MLE_B <- RelIRTPoly(itemPara_B, convTable_B, 10, "MLE")
+RelIRTPoly_MLE_B
+RelIRTPoly_EAP_A <- RelIRTPoly(itemPara_A, convTable_A, 10, "EAP")
+RelIRTPoly_EAP_A
+RelIRTPoly_EAP_B <- RelIRTPoly(itemPara_B, convTable_B, 10, "EAP")
+RelIRTPoly_EAP_B
 
-
-# method 1
-
-RelMLEPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE", rawData_A)
-RelMLEPoly_A
-
-RelMLEPoly_B <- RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE", rawData_B)
-RelMLEPoly_B
-
-RelEAPPoly_A <- RelIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP", rawData_A)
-RelEAPPoly_A
-RelEAPPoly_B <- RelIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP", rawData_B)
-RelEAPPoly_B
 
 
 ## EAP theta
@@ -340,6 +319,13 @@ L <- ggplot(csemLord, aes(x = rawScore, y = csemLord)) +
 
 print(L)
 dev.off()
+
+
+### data for excel
+# install.packages("xlsx")
+library(xlsx)
+write.xlsx(csemLord, "csemLord.xlsx")
+
 
 
 
@@ -521,6 +507,14 @@ SEM_Theta_A <- ggplot() +
 print(SEM_Theta_A)
 dev.off()
 
+write.xlsx(csemMLE_A, "csemtheta_A.xlsx", sheetName="csemMLE_A")
+write.xlsx(csemEAP_A, "csemtheta_A.xlsx", sheetName="csemEAP_A", append=TRUE)
+write.xlsx(thetaSEEAP_A, "csemtheta_A.xlsx", sheetName="thetaSEEAP_A", append=TRUE)
+
+
+
+
+
 png("TestData/CSSEM_Theta_B.png",  width = 799, height = 596)
 SEM_Theta_B <- ggplot() +
   geom_point(csemMLE_B, mapping = aes(x = theta, y = csemMLE,  shape = "CSEM MLE Information"), size = 2) +
@@ -537,6 +531,10 @@ SEM_Theta_B <- ggplot() +
 
 print(SEM_Theta_B)
 dev.off()
+
+write.xlsx(csemMLE_B, "csemtheta_B.xlsx", sheetName="csemMLE_B")
+write.xlsx(csemEAP_B, "csemtheta_B.xlsx", sheetName="csemEAP_B", append=TRUE)
+write.xlsx(thetaSEEAP_B, "csemtheta_B.xlsx", sheetName="thetaSEEAP_B", append=TRUE)
 
 
 # png("TestData/CSSEM_Theta_B.png",  width = 799, height = 596)
@@ -622,13 +620,17 @@ dev.off()
 
 
 # 5 CSSEM polynomial method ------------------------------------------
-
+library(ggplot2)
+library(xlsx)
 # form A
 cssemDat_A <- CSSEMPolynomial(40, convTable_A_sub, 20)$"CSSEMPolynomial"
+write.xlsx(cssemDat_A, "slope_A_polynomial_k3.xlsx", sheetName="slope_A_polynomial_k3")
+
 k <- 13 # test, accepted maximum + 1
 
 # form B
 cssemDat_B <- CSSEMPolynomial(40, convTable_B_sub, 20)$"CSSEMPolynomial"
+write.xlsx(cssemDat_B, "slope_B_polynomial_k3.xlsx", sheetName="slope_B_polynomial_k3")
 k <- 13 # test, accepted maximum + 1
 
 
@@ -714,63 +716,39 @@ dev.off()
 
 
 
+##### aggregate cssem Kolen's CSSEM
+
+cssemKolen_A <- as.data.frame(cssemKolen_A)
+cssemKolen_A$roundedSS <- round(cssemKolen_A$trueScaleScore)
+
+cssemKolen_B <- as.data.frame(cssemKolen_B)
+cssemKolen_B$roundedSS <- round(cssemKolen_B$trueScaleScore)
+
+# many to one aggr
+cssemKolen_A_Aggre <- aggregate(cssemKolen_A$cssemKolen, by=list(Category=cssemKolen_A$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+cssemKolen_B_Aggre <- aggregate(cssemKolen_B$cssemKolen, by=list(Category=cssemKolen_B$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+names(cssemKolen_A_Aggre) <- names(cssemKolen_B_Aggre) <- c("roundedSS", "cssemKolen")
+
+plot(cssemKolen_A_Aggre$roundedSS, cssemKolen_A_Aggre$cssemKolen)
+plot(cssemKolen_B_Aggre$roundedSS, cssemKolen_B_Aggre$cssemKolen)
+
+
+write.xlsx(cssemKolen_A_Aggre, "cssemKolen_A_Aggre.xlsx")
+write.xlsx(cssemKolen_B_Aggre, "cssemKolen_B_Aggre.xlsx")
+
+
+
+
+
+
+
+
+
 
 
 ### 456 for each form ----------------------------------------------------------
 
-
-
-# png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
-# SSEM_SSX_A <- ggplot() +
-#   geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 2) +
-#   geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 2) +
-#   geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 2) +
-#   # geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
-#   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
-#   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
-#                      limits = c(0,3)) +
-#   theme_bw() +
-#   theme(legend.title=element_blank())
-#
-# print(SSEM_SSX_A)
-# dev.off()
-#
-#
-#
-# png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
-# SSEM_SSX_A <- ggplot() +
-#   geom_line(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 1) +
-#   geom_line(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 1) +
-#   geom_line(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 1) +
-#   # geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
-#   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
-#   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
-#                      limits = c(0,3)) +
-#   theme_bw() +
-#   theme(legend.title=element_blank())
-#
-# print(SSEM_SSX_A)
-# dev.off()
-#
-#
-#
-# png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
-# SSEM_SSX_A <- ggplot() +
-#   geom_point(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 2) +
-#   geom_point(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 2) +
-#   geom_point(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 2) +
-#   geom_line(cssemKolen_A, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "cssemKolen_A", colour = "cssemKolen_A"), size = 1) +
-#   geom_line(cssemDat_A_Aggre, mapping = aes(x = roundedSS, y = cssemPolyk3,  shape = "cssemPoly_A", colour = "cssemPoly_A"), size = 1) +
-#   geom_line(cssemBinomial_A_Aggre, mapping = aes(x = roundedSS, y = cssemBinomial,  shape = "cssemBino_A", colour = "cssemBino_A"), size = 1) +
-#   # geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "Form B"), size = 2) +
-#   scale_x_continuous(name = "True Scale Score", breaks  = seq(100, 130, 5)) +
-#   scale_y_continuous(name = "CSSEM Kolen's IRT Method", breaks  = seq(0, 3, 0.5),
-#                      limits = c(0,3)) +
-#   theme_bw() +
-#   theme(legend.title=element_blank())
-#
-# print(SSEM_SSX_A)
-# dev.off()
 
 # point + line + bw
 png("TestData/CSSEM_SSX_A.png",  width = 799, height = 596)
@@ -791,6 +769,15 @@ print(SSEM_SSX_A)
 dev.off()
 
 
+write.xlsx(cssemKolen_A, "csemSSX_A.xlsx", sheetName="cssemKolen_A")
+write.xlsx(cssemDat_A_Aggre, "csemSSX_A.xlsx", sheetName="cssemDat_A_Aggre", append=TRUE)
+write.xlsx(cssemBinomial_A_Aggre, "csemSSX_A.xlsx", sheetName="cssemBinomial_A_Aggre", append=TRUE)
+
+
+
+
+
+
 png("TestData/CSSEM_SSX_B.png",  width = 799, height = 596)
 SSEM_SSX_B <- ggplot() +
   geom_point(cssemKolen_B, mapping = aes(x = trueScaleScore, y = cssemKolen,  shape = "CSSEM Kolen's Method"), size = 2) +
@@ -807,6 +794,12 @@ SSEM_SSX_B <- ggplot() +
 
 print(SSEM_SSX_B)
 dev.off()
+
+
+write.xlsx(cssemKolen_B, "csemSSX_B.xlsx", sheetName="cssemKolen_B")
+write.xlsx(cssemDat_B_Aggre, "csemSSX_B.xlsx", sheetName="cssemDat_B_Aggre", append=TRUE)
+write.xlsx(cssemBinomial_B_Aggre, "csemSSX_B.xlsx", sheetName="cssemBinomial_B_Aggre", append=TRUE)
+
 
 
 # point  + bw
@@ -835,9 +828,13 @@ dev.off()
 
 # CSSEM IRT MLE Polynomial
 cssemDat_MLE_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")$"CSSEMPolyMLE"
-k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+write.xlsx(cssemDat_MLE_A, "slope_A_polynomial_k4.xlsx", sheetName="slope_A_polynomial_k4")
+
+# k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
 cssemDat_MLE_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")$"CSSEMPolyMLE"
-k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+write.xlsx(cssemDat_MLE_B, "slope_B_polynomial_k7.xlsx", sheetName="slope_B_polynomial_k7")
+
+# k <- 8 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
 
 
 # many to one aggr
@@ -873,9 +870,9 @@ dev.off()
 
 # CSSEM IRT EAP Polynomial
 cssemDat_EAP_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "EAP")$"CSSEMPolyEAP"
-k <- 10 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+# k <- 10 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
 cssemDat_EAP_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "EAP")$"CSSEMPolyEAP"
-k <- 5 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
+# k <- 5 # test, accepted maximum + 1 # when ploting, set k = 10 by judgement
 
 
 # many to one aggr
@@ -907,6 +904,162 @@ print(CSSEM_Polynomial_EAP_AB)
 dev.off()
 
 
+
+# 9 EAP Polynomial method for posterior sd
+# form A: 4, form B: 7
+
+
+# SS(theta)
+
+thetaToSS <- function(theta, convTable, itemPara){
+
+  thetaMLE <- as.data.frame(theta)
+  # default K
+  K <- 10
+
+  rSquaredDat <- as.data.frame(matrix(nrow = K, ncol = 1))
+
+  # for loop to iterate different k
+  for (k in 1:K){
+    # k <- 4
+
+    # fit model with k
+    modelK <- lm(roundedSS ~ poly(theta, k, raw=TRUE), convTable)
+
+    # extract regression coefficients
+    regCoef <- summary(modelK)$coefficients[, 1]
+
+    # extract r square coefficient
+    rSquaredDat[k, 1]<- summary(modelK)$r.squared
+
+    # check whether regression coefficient of highest order is missing
+    if(is.na(regCoef[k+1])){
+
+      message(paste("The maximum k accepted is", k-1, sep = " "))
+
+      break
+
+    }
+
+    # calculate SS: from 1 to K
+    thetaMLE$SS <- 0
+    i <- k
+
+    while(i > 0){
+
+      thetaMLE$SS <- thetaMLE$SS +  regCoef[i+1] * thetaMLE$theta^(i)
+      i <- i-1
+
+    }
+
+    thetaMLE$SS <- thetaMLE$SS + regCoef[i+1]
+    thetaMLE$SS <- round(thetaMLE$SS)
+
+
+    # calculate cssem: from 1 to K
+    thetaMLE$fx <- 0
+    i <- k
+
+    while(i > 1){
+      thetaMLE$fx <- thetaMLE$fx +  regCoef[i+1] * (i * thetaMLE$theta^(i-1))
+      i <- i-1
+
+    }
+
+    thetaMLE$fx <- thetaMLE$fx + regCoef[i+1]
+    thetaMLE$cssemPoly <- thetaMLE$fx * (thetaMLE$csem)
+
+
+    # rename variable with indicator k
+    names(thetaMLE)[names(thetaMLE) == 'SS'] <- paste("SSk", k, sep = "")
+    names(thetaMLE)[names(thetaMLE) == 'cssemPoly'] <- paste("cssemPolyk", k, sep = "")
+  }
+  thetaMLE
+}
+
+
+
+# MLE
+# thetaMLE_A <- read.table("TestData/UShistory_X-sco.txt")[,4]
+# thetaMLE_B <- read.table("TestData/UShistory_Y-sco.txt")[,4]
+#
+# SS_MLE_A <- thetaToSS(thetaMLE_A, convTable_A, itemPara_A)
+# SS_MLE_B <- thetaToSS(thetaMLE_B, convTable_B, itemPara_B)
+#
+# cor(SS_MLE_A$SSk4, SS_MLE_B$SSk7)
+
+
+# EAP ----SS
+
+thetaEAP_A <- read.table("TestData/UShistory_X_EAP-sco.txt")[,c(3,4)]
+thetaEAP_A <- as.data.frame(thetaEAP_A)
+names(thetaEAP_A) <- c("theta", "csem")
+head(thetaEAP_A)
+
+
+SS_EAP_A <- thetaToSS(thetaEAP_A, convTable_A_Poly, itemPara_A)
+head(SS_EAP_A)
+
+# many to one aggr
+
+thetaEAP_A_Aggre <- aggregate(SS_EAP_A$cssemPolyk4, by=list(Category=SS_EAP_A$SSk4), FUN=function(x){sqrt(sum(x^2)/length(x))})
+names(thetaEAP_A_Aggre)  <- c("roundedSS", "cssemPoly")
+
+
+
+
+
+
+
+# Form B
+
+thetaEAP_B <- read.table("TestData/UShistory_Y_EAP-sco.txt")[,c(3,4)]
+thetaEAP_B <- as.data.frame(thetaEAP_B)
+names(thetaEAP_B) <- c("theta", "csem")
+head(thetaEAP_B)
+
+
+SS_EAP_B <- thetaToSS(thetaEAP_B, convTable_B_Poly, itemPara_B)
+head(SS_EAP_B)
+
+# many to one aggr
+
+thetaEAP_B_Aggre <- aggregate(SS_EAP_B$cssemPolyk7, by=list(Category=SS_EAP_B$SSk7), FUN=function(x){sqrt(sum(x^2)/length(x))})
+names(thetaEAP_B_Aggre)  <- c("roundedSS", "cssemPoly")
+
+
+
+# k <- 4
+#
+# modelK <- lm(roundedSS ~ poly(theta, k, raw=TRUE), convTable)
+#
+# # extract regression coefficients
+# regCoef <- summary(modelK)$coefficients[, 1]
+#
+# # thetaEAP_A <- within(thetaEAP_A,
+# #                      {csem = csem^2})
+#
+# thetaEAP_A <- within(thetaEAP_A,
+#                      {SS = 0.009014156* theta^4 +   -0.036053623* theta^3 +
+#                        -0.360085771* theta^2 + 3.909028972* theta^1 + 118.263733790})
+#
+#
+# thetaEAP_A <- within(thetaEAP_A,
+#                      {cssem = sqrt((4 * 0.009014156* theta^3 +   3*-0.036053623* theta^2 +
+#                        2*-0.360085771* theta^1 + 3.909028972) * csem^2)})
+#
+#
+# ggplot(thetaEAP_A, aes(x = SS, y = cssem)) +
+#   geom_point() +
+#   scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5), limits = c(100,130)) +
+#   scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 4.5, 0.5), limits = c(0,4.5))
+
+
+
+
+
+
+
 ## 78 for each form --------------------------
 
 # Form A
@@ -914,46 +1067,69 @@ dev.off()
 png("TestData/CSSEM_Polynomial_SSTheta_A.png",  width = 799, height = 596)
 CSSEM_Polynomial_SSTheta_A <- ggplot() +
   geom_point(cssemDat_MLE_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 2) +
-  geom_point(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 2) +
+  geom_point(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP Information"), size = 2) +
+  geom_point(thetaEAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP Posterior"), size = 2) +
   geom_line(cssemDat_MLE_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 0.6) +
-  geom_line(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 0.6) +
+  geom_line(cssemDat_EAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP Information"), size = 0.6) +
+  geom_line(thetaEAP_A_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP Posterior"), size = 0.6) +
   scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
-  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 4.5, 0.5),
-                     limits = c(0,4.5)) +
+  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
   theme_bw() +
   theme(legend.title=element_blank())
 
 print(CSSEM_Polynomial_SSTheta_A)
 dev.off()
 
-# Form A
+
+write.xlsx(cssemDat_MLE_A_Aggre, "csemSSTheta_A.xlsx", sheetName="cssemDat_MLE_A_Aggre")
+write.xlsx(cssemDat_EAP_A_Aggre, "csemSSTheta_A.xlsx", sheetName="cssemDat_EAP_A_Aggre", append=TRUE)
+write.xlsx(thetaEAP_A_Aggre, "csemSSTheta_A.xlsx", sheetName="thetaEAP_A_Aggre", append=TRUE)
+
+
+
+# Form B
 png("TestData/CSSEM_Polynomial_SSTheta_B.png",  width = 799, height = 596)
 CSSEM_Polynomial_SSTheta_B <- ggplot() +
   geom_point(cssemDat_MLE_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 2) +
   geom_point(cssemDat_EAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 2) +
+  geom_point(thetaEAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP Posterior"), size = 2) +
   geom_line(cssemDat_MLE_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "MLE"), size = 0.6) +
   geom_line(cssemDat_EAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP"), size = 0.6) +
+  geom_line(thetaEAP_B_Aggre, mapping = aes(x = roundedSS, y = cssemPoly,  shape = "EAP Posterior"), size = 0.6) +
   scale_x_continuous(name = "Rounded Scale Score", breaks  = seq(100, 130, 5)) +
-  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 4.5, 0.5),
-                     limits = c(0,4.5)) +
+  scale_y_continuous(name = "CSSEM Polynomial Method", breaks  = seq(0, 3, 0.5),
+                     limits = c(0,3)) +
   theme_bw() +
   theme(legend.title=element_blank())
 
 print(CSSEM_Polynomial_SSTheta_B)
 dev.off()
 
+write.xlsx(cssemDat_MLE_B_Aggre, "csemSSTheta_B.xlsx", sheetName="cssemDat_MLE_B_Aggre")
+write.xlsx(cssemDat_EAP_B_Aggre, "csemSSTheta_B.xlsx", sheetName="cssemDat_EAP_B_Aggre", append=TRUE)
+write.xlsx(thetaEAP_B_Aggre, "csemSSTheta_B.xlsx", sheetName="thetaEAP_B_Aggre", append=TRUE)
 
 
 
 
 
 
+# Form A k =4 roundedSS to theta
+
+k <- 7
+
+modelK <- lm(roundedSS ~ poly(theta, k, raw=TRUE), convTable_B_Poly)
+
+# extract regression coefficients
+regCoef <- summary(modelK)$coefficients[, 1]
+regCoef
 
 
+prd <- data.frame(theta = seq(from = -5, to = 5, length.out = 150))
+prd$predictedSS <- predict(modelK, newdata = prd, se.modelK = TRUE)
 
-
-
-
+write.xlsx(prd, "Fitted Line_B.xlsx", sheetName="Fitted Line_B")
 
 
 
@@ -976,8 +1152,6 @@ cssemDatLong <- reshape(cssemDatAggre,
                         idvar = c("cssemPolyk1.Category"),
                         timevar = "Kvalue",
                         times = 1:(k-1))
-
-
 
 
 

@@ -5,7 +5,7 @@
 #'
 #' @param numOfItem a numeric number indicating number of items
 #' @param convTable a data frame or matrix containing conversion table of raw score to scale score
-#' @param K a numeric number indicating degree of polynomial regression
+#' @param K a numeric number indicating degree of polynomial regression, 10 in default
 #' @param estType estimation method, MLE or EAP
 #'
 #' @return a list containing R square and CSSEM using Polynomial Method
@@ -14,7 +14,7 @@
 #'
 #' @export
 
-CSSEMIRTPoly <- function(itemPara, convTable, K, estType){
+CSSEMIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
   # theta
   theta <- convTable$theta
