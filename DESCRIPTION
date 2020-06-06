@@ -10,5 +10,8 @@ License: What license is it under?
 Encoding: UTF-8
 BugReports: https://github.com/liuhuan90123/EMReliability
 Imports:
-RoxygenNote: 7.0.2
+  profvis,
+  LaplacesDemon,
+  mvtnorm
+RoxygenNote: 7.1.0
 LazyData: true
