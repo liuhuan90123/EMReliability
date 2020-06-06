@@ -63,10 +63,12 @@ itemPara <- itemPara_SS_A
 cormat <- cormat_A
 convTable <- convTable_A
 
-TestRelSSMIRT <- function(itemPara, strat, cormat, convTable){
 
-  # num of items
-  numOfItem <- nrow(itemPara)
+
+
+
+
+TestRelMIRT <- function(itemPara, strat, cormat,convTable, numOfQuad = 11){ #modelType,
 
   # num of quadratures
   numOfQuad <- 11
@@ -76,11 +78,28 @@ TestRelSSMIRT <- function(itemPara, strat, cormat, convTable){
 
   # set nodes and weights
   nodes <- seq(-4, 4, length.out = numOfQuad)
-  nodesM <- as.matrix(expand.grid(nodes,nodes,nodes))
-  weightsUnwtd <- dmvnorm(nodesM, c(0,0,0), cormat, log=FALSE) # mvtnorm
+
+  # if(modelType = "bf"){
+  #   numOfFactors <- numOfFactors + 1
+  # }
+
+  nodesM <- as.matrix(switch(numOfFactors,
+                             {expand.grid(nodes)},
+                             {expand.grid(nodes, nodes)},
+                             {expand.grid(nodes, nodes, nodes)},
+                             {expand.grid(nodes, nodes, nodes, nodes)},
+                             {expand.grid(nodes, nodes, nodes, nodes, nodes)}))
+
+
+  weightsUnwtd <- dmvnorm(nodesM, c(rep(0,numOfFactors)), cormat, log=FALSE) # mvtnorm
   nodesM <- as.data.frame(nodesM)
   nodesM$weightsWtd <- weightsUnwtd / sum(weightsUnwtd)
 
+
+  # item parameters and quadrature points to P/Q
+
+  # num of items
+  numOfItem <- nrow(itemPara)
 
   # fxtheta distribution function
   FxTheta <- function(itemPara){
@@ -150,144 +169,111 @@ TestRelSSMIRT <- function(itemPara, strat, cormat, convTable){
   names(fxTheta2) <- c(0:strat[2])
   names(fxTheta3) <- c(0:strat[3])
 
-  # for loop
-  # raw
-  tau <- c()
-  errvar <- c()
-  fyDistMat <- matrix(NA,numOfQuad^3,32)
-
-  # SS
-  nodesMSS <- nodesM
 
 
-  tauSS <- c()
-  errvarSS <- c()
-  fySSDistMat <- matrix(NA,numOfQuad^3,32)
+  fxTheta1$Var1 <- seq(-4, 4, length.out = numOfQuad)
+  nodesM <- merge(x = nodesM, y = fxTheta1, by = "Var1", all.x = TRUE)
+
+  fxTheta2$Var2 <- seq(-4, 4, length.out = numOfQuad)
+  nodesM <- merge(x = nodesM, y = fxTheta2, by = "Var2", all.x = TRUE)
+
+  fxTheta3$Var3 <- seq(-4, 4, length.out = numOfQuad)
+  nodesM <- merge(x = nodesM, y = fxTheta3, by = "Var3", all.x = TRUE)
 
 
-  n <- 0
-  for (k in 1:numOfQuad){
-    for (j in 1:numOfQuad){
-      for (i in 1:numOfQuad){
-        # index
-        n <- n+1
+  for(i in 1:nrow(nodesM)){
+    # i <- 1
+    # fx distribution
+    fx1 <- t(nodesM[i, 5:(5+strat[1])])
+    fx2 <- t(nodesM[i, (5+strat[1]+1):(5+strat[1]+strat[2]+1)])
+    fx3 <- t(nodesM[i, (5+strat[1]+strat[2]+1+1):(5+strat[1]+strat[2]+1+strat[3]+1)])
+
+    rownames(fx1) <- 0:strat[1]
+    rownames(fx2) <- 0:strat[2]
+    rownames(fx3) <- 0:strat[3]
+
+    xSum <- expand.grid(rownames(fx1), rownames(fx2), rownames(fx3))
+    names(xSum) <- c("x1", "x2", "x3")
+
+    fxSum <- expand.grid(fx1, fx2, fx3)
+    names(fxSum) <- c("fx1", "fx2", "fx3")
+
+    fxThetaSum <- cbind(fxSum, xSum)
+
+    fxThetaSum$x1 <- as.numeric(as.character(fxThetaSum$x1))
+    fxThetaSum$x2 <- as.numeric(as.character(fxThetaSum$x2))
+    fxThetaSum$x3 <- as.numeric(as.character(fxThetaSum$x3))
+
+    # fy distribution
+    fxThetaSum$y <- fxThetaSum$x1 + fxThetaSum$x2 + fxThetaSum$x3
+    fxThetaSum$wty <- fxThetaSum$fx1 * fxThetaSum$fx2 * fxThetaSum$fx3
+    fy <- fxThetaSum[,c("y", "wty")]
+    fyDist <- aggregate(fy$wty, by=list(Category=fy$y), FUN=sum)
+    names(fyDist) <- c("y", "wts")
+
+    # weighted mean of Obs Y (true y) and variance of Obs Y
+    weightedMean <- sum(fyDist$y * fyDist$wts)/sum(fyDist$wts)
+    varianceY <- sum(fyDist$wts * (fyDist$y - weightedMean)^2)
+
+    # save results
+    nodesM[i,"weightedMean"] <- weightedMean
+    nodesM[i,"varianceY"] <- varianceY
+
+    # SS
+
+    fySSDist <- merge(fyDist, convTable, by = "y")
+
+    # weighted mean of Obs Y (true y) and variance of Obs Y
+    weightedMeanSS <- sum(fySSDist$roundedSS * fySSDist$wts)/sum(fySSDist$wts)
+    varianceYSS <- sum(fySSDist$wts * (fySSDist$roundedSS - weightedMeanSS)^2)
+
+    # store results
+    nodesM[i,"weightedMeanSS"] <- weightedMeanSS
+    nodesM[i,"varianceYSS"] <- varianceYSS
+    #fySSDistMat[n,] <- t(fySSDist$wts)
 
 
-        # i <- j <- k <- 1 # test
-        # n <- 1 # test
-
-        # fx distribution
-        fx1 <- t(fxTheta1[i,])
-        fx2 <- t(fxTheta2[j,])
-        fx3 <- t(fxTheta3[k,])
-
-        xSum <- expand.grid(rownames(fx1), rownames(fx2), rownames(fx3))
-        names(xSum) <- c("x1", "x2", "x3")
-
-        fxSum <- expand.grid(fx1, fx2, fx3)
-        names(fxSum) <- c("fx1", "fx2", "fx3")
-
-        fxThetaSum <- cbind(fxSum, xSum)
-
-        fxThetaSum$x1 <- as.numeric(as.character(fxThetaSum$x1))
-        fxThetaSum$x2 <- as.numeric(as.character(fxThetaSum$x2))
-        fxThetaSum$x3 <- as.numeric(as.character(fxThetaSum$x3))
-
-        # fy distribution
-        fxThetaSum$y <- fxThetaSum$x1 + fxThetaSum$x2 + fxThetaSum$x3
-        fxThetaSum$wty <- fxThetaSum$fx1 * fxThetaSum$fx2 * fxThetaSum$fx3
-        fy <- fxThetaSum[,c("y", "wty")]
-        fyDist <- aggregate(fy$wty, by=list(Category=fy$y), FUN=sum)
-        names(fyDist) <- c("y", "wts")
-
-        # weighted mean of Obs Y (true y) and variance of Obs Y
-        weightedMean <- sum(fyDist$y * fyDist$wts)/sum(fyDist$wts)
-        varianceY <- sum(fyDist$wts * (fyDist$y - weightedMean)^2)
-
-        # save results
-        tau[n] <- weightedMean
-        errvar[n] <- varianceY
-        fyDistMat[n,] <- t(fyDist$wts)
-
-
-        # SS
-
-        fySSDist <- merge(fyDist, convTable, by = "y")
-
-        # weighted mean of Obs Y (true y) and variance of Obs Y
-        weightedMeanSS <- sum(fySSDist$roundedSS * fySSDist$wts)/sum(fySSDist$wts)
-        varianceYSS <- sum(fySSDist$wts * (fySSDist$roundedSS - weightedMeanSS)^2)
-
-        # store results
-        tauSS[n] <- weightedMeanSS
-        errvarSS[n] <- varianceYSS
-        fySSDistMat[n,] <- t(fySSDist$wts)
-
-
-
-      }
-    }
   }
 
-  nodesM$tau <- tau
-  nodesM$errvar <- errvar
-  nodesM[,7:38] <- fyDistMat
+  # variance of error
+  varianceError <- sum(nodesM$weightsWtd * nodesM$varianceY)
+  varianceErrorSS <- sum(nodesM$weightsWtd * nodesM$varianceYSS)
 
-  #SS
-  nodesMSS$tauSS <- tauSS
-  nodesMSS$errvarSS <- errvarSS
-  nodesMSS[,7:38] <- fySSDistMat
-
-  # sum of error variance
-  varianceError <- sum(nodesM$weightsWtd*nodesM$errvar)
-  varianceErrorSS <- sum(nodesMSS$weightsWtd*nodesMSS$errvarSS)
-
-  # sum of observed score variance
-  fyThetaWeighted <- apply(nodesM[,7:(7 + numOfItem)], 2, function(x) x * nodesM[,"weightsWtd"])
-  fySSThetaWeighted <- apply(nodesMSS[,7:(7 + numOfItem)], 2, function(x) x * nodesMSS[,"weightsWtd"])
-
-  # sum weighted distribution
-  fyObsDist <- as.data.frame(matrix(colSums(fyThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
-  fyObsDist$y <- c(0:numOfItem) # test
-  names(fyObsDist) <- c("wts", "y")
-
-  fySSObsDist <- as.data.frame(matrix(colSums(fySSThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
-  fySSObsDist$roundedSS <- convTable$roundedSS # test
-  names(fySSObsDist) <- c("wts", "roundedSS")
 
   # weighted mean of Obs Y
-  weightedMean <- sum(fyObsDist$y * fyObsDist$wts)/sum(fyObsDist$wts)
-  weightedMeanSS <- sum(fySSObsDist$roundedSS * fySSObsDist$wts)/sum(fySSObsDist$wts)
+  weightedMean <- sum(nodesM$weightedMean * nodesM$weightsWtd)/sum(nodesM$weightsWtd)
+  weightedMeanSS <- sum(nodesM$weightedMeanSS * nodesM$weightsWtd)/sum(nodesM$weightsWtd)
 
 
   # variance of Obs Y
-  varianceObsY <- sum(fyObsDist$wts * (fyObsDist$y - weightedMean)^2)
-  varianceObsYSS <- sum(fySSObsDist$wts * (fySSObsDist$roundedSS - weightedMeanSS)^2)
+  varianceTrueY <- sum(nodesM$weightsWtd * (nodesM$weightedMean - weightedMean)^2)
+  varianceTrueYSS <- sum(nodesM$weightsWtd * (nodesM$weightedMeanSS - weightedMeanSS)^2)
+
+  varianceObsY <- varianceError + varianceTrueY
+  varianceObsYSS <- varianceErrorSS + varianceTrueYSS
 
   # MIRT test reliability
-  TestRelSSMIRT <- 1 - varianceError/varianceObsY
-  TestRelSSMIRTSS <- 1 - varianceErrorSS/varianceObsYSS
+  TestRelSSMIRT <- 1 - varianceError/(varianceError + varianceTrueY)
+  TestRelSSMIRTSS <- 1 - varianceErrorSS/(varianceErrorSS + varianceTrueYSS)
+
+
+  # varianceError
+  # varianceTrueY
+  # varianceObsY
+  # TestRelSSMIRT
+  #
+  # varianceErrorSS
+  # varianceTrueYSS
+  # varianceObsYSS
+  # TestRelSSMIRTSS
 
   return(list("TestRelSSMIRT" = TestRelSSMIRT, "TestRelSSMIRT_ScaleScore" = TestRelSSMIRTSS))
+
 
 }
 
 
-varianceError
-varianceObsY
-TestRelSSMIRT
 
-varianceErrorSS
-varianceObsYSS
-TestRelSSMIRTSS
-
-
-
-TestRelSSMIRT(itemPara_SS_A, strat, cormat_A, convTable_A)
-TestRelSSMIRT(itemPara_SS_B, strat, cormat_B, convTable_B)
-
-# profvis({
-#   TestRelSSMIRT(itemPara_SS_A, strat, cormat_A)
-# })
-
-
+profile({
+  TestRelMIRT(itemPara, strat, cormat,convTable, numOfQuad)
+})

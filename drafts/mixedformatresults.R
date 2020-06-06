@@ -257,4 +257,21 @@ write.table(format(nodesM, digits=10), "thetathreeformB.txt", col.names = F, row
 
 
 
+### four factor normal
 
+# set nodes and weights
+nodes <- seq(-4, 4, length.out = numOfQuad)
+nodesM <- as.matrix(expand.grid(nodes,nodes,nodes,nodes))
+weightsUnwtd <- dmvnorm(nodesM, c(0,0,0,0), diag(4), log=FALSE) # mvtnorm
+nodesM <- as.data.frame(nodesM)
+nodesM$weightsWtd <- weightsUnwtd #/ sum(weightsUnwtd)
+
+
+# nodesM <- nodesM[,c("Var3", "Var2", "Var1", "weightsWtd")]
+nodesM$Var4 <- format(nodesM$Var4, scientific = FALSE)
+nodesM$Var3 <- format(nodesM$Var3, scientific = FALSE)
+nodesM$Var2 <- format(nodesM$Var2, scientific = FALSE)
+nodesM$Var1 <- format(nodesM$Var1, scientific = FALSE)
+nodesM$weightsWtd <- round(nodesM$weightsWtd, 10)
+
+write.table(format(nodesM, digits=10), "thetafourformA.txt", col.names = F, row.names = F, quote = F)

@@ -9,29 +9,29 @@ library(mvtnorm)
 
 
 # read item parameters from txt file
-# itemPara_BF <- read.table("TestData/SpanishLit_prm_A_BF.txt")[,c(7:11)]
-itemPara_BF <- read.table("TestData/SpanishLit_prm_B_BF.txt")[,c(7:11)]
+itemPara_BF <- read.table("TestData/SpanishLit_prm_A_BF.txt")[,c(7:11)]
+# itemPara_BF <- read.table("TestData/SpanishLit_prm_B_BF.txt")[,c(7:11)]
 
 # read conversion tables
-# convTable_A <- read.csv("TestData/conversion_table_Form A.csv")
-# convTable_A <- convTable_A[1:32, c("RawScore", "roundedSS")]
-# names(convTable_A) <- c("y","roundedSS")
-# convTable <- convTable_A
+convTable_A <- read.csv("TestData/conversion_table_Form A.csv")
+convTable_A <- convTable_A[1:32, c("RawScore", "roundedSS")]
+names(convTable_A) <- c("y","roundedSS")
+convTable <- convTable_A
 
 
-convTable_B <- read.csv("TestData/conversion_table_Form B.csv")
-convTable_B <- convTable_B[1:32, c("RawScore", "roundedSS")]
-names(convTable_B) <- c("y","roundedSS")
-convTable <- convTable_B
+# convTable_B <- read.csv("TestData/conversion_table_Form B.csv")
+# convTable_B <- convTable_B[1:32, c("RawScore", "roundedSS")]
+# names(convTable_B) <- c("y","roundedSS")
+# convTable <- convTable_B
 
 
-
+strat <- c(13, 12, 6)
 
 names(itemPara_BF) <- c("b", "ag","a1","a2", "a3") # ag is primary
 itemPara_BF$ai <- c(itemPara_BF$a1[1:13], itemPara_BF$a2[14:25], itemPara_BF$a3[26:31])
 
 # num of items
-numOfItem <- nrow(itemPara)
+numOfItem <- nrow(itemPara_BF)
 
 # num of quadratures
 numOfQuad <- 11
@@ -224,11 +224,9 @@ nodesMSS[,8:39] <- fySSDistMat
 
 
 
-
-numOfItem <- 31
 # sum of error variance
-varianceError <- sum(nodesM$weightsWtd*nodesM$errvar)
-varianceErrorSS <- sum(nodesMSS$weightsWtd*nodesMSS$errvarSS)
+varianceError <- sum(nodesM$weightsWtd * nodesM$errvar)
+varianceErrorSS <- sum(nodesMSS$weightsWtd * nodesMSS$errvarSS)
 
 # sum of observed score variance
 fyThetaWeighted <- apply(nodesM[,8:(8 + numOfItem)], 2, function(x) x * nodesM[,"weightsWtd"])
