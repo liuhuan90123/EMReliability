@@ -29,9 +29,28 @@ library(EMReliability)
 rawData_A <- read.table("TestData/RawDataFormX.txt")
 rawData_B <- read.table("TestData/RawDataFormY.txt")
 
+## 0.39
+
+csem39 <- as.data.frame(abs(rowSums(rawData_A) - rowSums(rawData_B))/sqrt(2))
+
+plot(csem39)
+
+csem39$rawScore <- round((rowSums(rawData_A) + rowSums(rawData_B))/2)
+
+
+names(csem39) <- c("csem39", "rawScore")
+
+csem39 <- aggregate(csem39$csem39, by=list(Category=csem39$rawScore), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+library(xlsx)
+
+write.xlsx(csem39, "csem39.xlsx")
+
+
 sum(diag(cov(rawData_A)))
 
-
+sum(cov(rawData_A))
+var(rowSums(rawData_A))
 
 # read item parameters from txt file
 itemPara_A <- read.table("TestData/ItemParaFormX.txt")
@@ -56,14 +75,20 @@ convTable_B_Poly <- convTable_B[,c("theta", "roundedSS")]
 # raw score
 cor(rowSums(rawData_A),rowSums(rawData_B))
 
+library(dplyr)
 # SS(X)
 rawScore_A <- as.data.frame(rowSums(rawData_A))
 names(rawScore_A) <- "rawScore"
 rawSS_A <- left_join(rawScore_A, convTable_A, by = "rawScore")
+var(rawSS_A$roundedSS)
 
 rawScore_B <- as.data.frame(rowSums(rawData_B))
 names(rawScore_B) <- "rawScore"
 rawSS_B <- left_join(rawScore_B, convTable_B, by = "rawScore")
+var(rawSS_B$roundedSS)
+
+14.011 + 1.682
+
 
 cor(rawSS_A$roundedSS, rawSS_B$roundedSS)
 
@@ -172,11 +197,59 @@ Feldt_B <- Feldt(rawData_B)
 Feldt_B
 
 # test reliability IRT
-TestRelIRT_A <- TestRelIRT(itemPara_A)
+TestRelIRT_A <- TestRelIRT(itemPara_A, convTable_A)
 TestRelIRT_A
 
-TestRelIRT_B <- TestRelIRT(itemPara_B)
+TestRelIRT_B <- TestRelIRT(itemPara_B, convTable_B)
 TestRelIRT_B
+
+
+
+write.xlsx(TestRelIRT_A$`Conditional SEMs`, "testCSEM_single_A.xlsx")
+write.xlsx(TestRelIRT_B$`Conditional SEMs`, "testCSEM_single_B.xlsx")
+
+
+TestRelIRT_A_SS <- TestRelIRT_A$`Conditional SEMs`[,c("Ex_Scale", "Scale_CSEM")]
+TestRelIRT_A_SS$roundedSS <- round(TestRelIRT_A_SS$Ex_Scale)
+TestRelIRT_A_SS_Aggre <- aggregate(TestRelIRT_A_SS$Scale_CSEM, by=list(Category=TestRelIRT_A_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+TestRelIRT_B_SS <- TestRelIRT_B$`Conditional SEMs`[,c("Ex_Scale", "Scale_CSEM")]
+TestRelIRT_B_SS$roundedSS <- round(TestRelIRT_B_SS$Ex_Scale)
+TestRelIRT_B_SS_Aggre <- aggregate(TestRelIRT_B_SS$Scale_CSEM, by=list(Category=TestRelIRT_B_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+
+names(TestRelIRT_A_SS_Aggre) <- names(TestRelIRT_B_SS_Aggre) <- c("roundedSS", "cssemKolen")
+
+
+write.xlsx(TestRelIRT_A_SS_Aggre, "TestRelIRT_A_SS_Aggre.xlsx")
+write.xlsx(TestRelIRT_B_SS_Aggre, "TestRelIRT_B_SS_Aggre.xlsx")
+
+
+
+TestRelIRT_A_SS <- TestRelIRT_A$`Conditional SEMs`[,c("Ex_Raw", "Raw_CSEM")]
+TestRelIRT_A_SS$roundedSS <- round(TestRelIRT_A_SS$Ex_Raw)
+TestRelIRT_A_SS_Aggre <- aggregate(TestRelIRT_A_SS$Raw_CSEM, by=list(Category=TestRelIRT_A_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+TestRelIRT_B_SS <- TestRelIRT_B$`Conditional SEMs`[,c("Ex_Raw", "Raw_CSEM")]
+TestRelIRT_B_SS$roundedSS <- round(TestRelIRT_B_SS$Ex_Raw)
+TestRelIRT_B_SS_Aggre <- aggregate(TestRelIRT_B_SS$Raw_CSEM, by=list(Category=TestRelIRT_B_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+
+names(TestRelIRT_A_SS_Aggre) <- names(TestRelIRT_B_SS_Aggre) <- c("Raw", "cssemKolen")
+
+
+write.xlsx(TestRelIRT_A_SS_Aggre, "TestRelIRT_A_Raw_Aggre.xlsx")
+write.xlsx(TestRelIRT_B_SS_Aggre, "TestRelIRT_B_Raw_Aggre.xlsx")
+
+
+
+
+
+
+
+
+
+
 
 # marginal reliability MLE
 MarginalRelMLE_A <- MarginalRelIRT(itemPara_A, "MLE")
@@ -185,12 +258,47 @@ MarginalRelMLE_A
 MarginalRelMLE_B <- MarginalRelIRT(itemPara_B, "MLE")
 MarginalRelMLE_B
 
+# weights and nodes
+
+itemPara <- itemPara_B
+quadPoints <- NormalQuadraPoints(41)
+
+estType <-  "MLE"
+
+# calculate info
+itemParaInfo <- as.data.frame(Info(quadPoints$nodes, itemPara, "MLE"))
+
+# inverse of information
+itemParaInfo$infoMLEInv <- 1 / itemParaInfo$infoMLE
+
+
+
+
+
+# add weights for each theta
+itemParaInfo$weights <- quadPoints$weights
+
+sum(itemParaInfo$infoMLEInv * itemParaInfo$weights)
+
+
+# weighted information
+itemParaInfo$infoWeighted <- itemParaInfo$weights * itemParaInfo$infoMLE
+
+# marginal reliability MLE
+marginalRelMLE <- sum(itemParaInfo$infoWeighted)/(sum(itemParaInfo$infoWeighted) + 1)
+
+
+
+
+
 # marginal reliability EAP
 MarginalRelEAP_A <- MarginalRelIRT(itemPara_A, "EAP")
 MarginalRelEAP_A
 
 MarginalRelEAP_B <- MarginalRelIRT(itemPara_B, "EAP")
 MarginalRelEAP_B
+
+
 
 # Kolen's method
 
@@ -202,11 +310,11 @@ convTable_B <- read.csv("TestData/ConversionTableFormY.csv")
 convTable_B$roundedSS <- round(convTable_B$unroundedSS)
 
 
-KolenRelIRT_A <- KolenRelIRT(itemPara_A, convTable_A)
-KolenRelIRT_A
-
-KolenRelIRT_B <- KolenRelIRT(itemPara_B, convTable_B)
-KolenRelIRT_B
+# KolenRelIRT_A <- KolenRelIRT(itemPara_A, convTable_A)
+# KolenRelIRT_A
+#
+# KolenRelIRT_B <- KolenRelIRT(itemPara_B, convTable_B)
+# KolenRelIRT_B
 
 # Polynomial method reliability for EAP and MLE
 # method 2
@@ -225,6 +333,9 @@ RelIRTPoly_EAP_B
 ## EAP theta
 
 
+# EAP <- EAPTheta(itemPara_A, rawData_A)
+# EAPtheta <- EAP[order(EAP[,1])]
+
 # EAPTheta(itemPara_A, rawData_A)
 # EAPTheta(itemPara_B, rawData_B)
 
@@ -241,6 +352,30 @@ RelIRTPoly_EAP_B
 # CSEM Lord
 csemLord <- CSEMLord(40)
 csemLord
+
+
+## Keat's correction to Lord's CSEM
+
+KR20_A <- KR20(rawData_A)
+KR21_A <- KR21(rawData_A)
+
+
+csemLordKeat_A <- sqrt(csemLord$csemLord^2 * (1-KR20_A) / (1-KR21_A))
+csemLordKeat_A
+
+
+write.xlsx(csemLordKeat_A, "csemLordKeat_A.xlsx")
+
+KR20_B <- KR20(rawData_B)
+KR21_B <- KR21(rawData_B)
+
+
+csemLordKeat_B <- sqrt(csemLord$csemLord^2 * (1-KR20_B) / (1-KR21_B))
+csemLordKeat_B
+write.xlsx(csemLordKeat_B, "csemLordKeat_B.xlsx")
+
+
+
 
 # CSEM MLE
 csemMLE_A <- CSEMIRT(NormalQuadraPoints(41)$nodes, itemPara_A, "MLE")
@@ -270,9 +405,9 @@ numOfItem <- 40
 convTable_A_sub <- convTable_A[,c("rawScore", "roundedSS")]
 convTable_B_sub <- convTable_B[,c("rawScore", "roundedSS")]
 
-cssemPolynomial_A <- CSSEMPolynomial(numOfItem, convTable_A_sub, 20)
+cssemPolynomial_A <- CSSEMPolynomial(numOfItem, convTable_A_sub, 10)
 cssemPolynomial_A
-cssemPolynomial_B <- CSSEMPolynomial(numOfItem, convTable_B_sub, 20)
+cssemPolynomial_B <- CSSEMPolynomial(numOfItem, convTable_B_sub, 10)
 cssemPolynomial_B
 
 # CSSEM Kolen's Method
@@ -282,10 +417,14 @@ cssemKolen_B <- CSSEMKolen(itemPara_B, convTable_B)
 cssemKolen_B
 
 # CSSEM IRT MLE Polynomial
-
-cssemMLEPoly_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 20, "MLE")
+library(ggplot2)
+getOption("max.print")
+options(max.print=1000000)
+cssemMLEPoly_A <- CSSEMIRTPoly(itemPara_A, convTable_A_Poly, 10, "MLE")
 cssemMLEPoly_A
-cssemMLEPoly_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 20, "MLE")
+cssemMLEPoly_A$CSSEMPolyMLE
+
+cssemMLEPoly_B <- CSSEMIRTPoly(itemPara_B, convTable_B_Poly, 10, "MLE")
 cssemMLEPoly_B
 
 # CSSEM IRT EAP Polynomial
@@ -443,7 +582,7 @@ print(csemEAP_AB_P)
 dev.off()
 
 
-### MLE and EAP based on posterior tehta distribution
+### MLE and EAP based on posterior theta distribution
 
 # MLE
 thetaSEMLE_A <- read.table("TestData/UShistory_X-sco.txt")[,c(4,5)]
@@ -465,7 +604,14 @@ ggplot() +
 
 #EAP
 thetaSEEAP_A <- read.table("TestData/UShistory_X_EAP-sco.txt")[,c(3,4)]
+
+1 - mean(thetaSEEAP_B$V4^2)
+
+
+
 thetaSEEAP_B <- read.table("TestData/UShistory_Y_EAP-sco.txt")[,c(3,4)]
+
+
 # thetaSEEAP_A <- thetaSEEAP_A[order(thetaSEEAP_A$V3),]
 # thetaSEEAP_A <- thetaSEEAP_A[seq(1,3000,75),]
 # thetaSEEAP_B <- thetaSEEAP_B[order(thetaSEEAP_B$V3),]
@@ -1309,3 +1455,69 @@ for (k in 1:K){
   print(p)
 
 }
+
+## MLE
+# Form A
+TS <- 14.620
+S <- 16.703
+ES <- 1.918
+
+r3 <- TS/S
+r3
+r4 <- 1-ES/S
+r4
+r5 <- TS/(TS+ES)
+r5
+
+# Form B
+TS <- 14.492
+S <- 16.256
+ES <- 1.930
+
+r3 <- TS/S
+r3
+r4 <- 1-ES/S
+r4
+r5 <- TS/(TS+ES)
+r5
+
+
+## EAP
+# Form A
+TS <- 14.620
+S <- 12.807
+ES <- 1.674
+ESInfo <- 1.672
+
+r3 <- S/TS
+r3
+r4 <- 1-ES/TS
+r4
+r5 <- S/(S+ES)
+r5
+r8 <- 1-ESInfo/TS
+r8
+
+# Form B
+TS <- 14.492
+S <- 12.197
+ES <- 1.675
+ESInfo <- 1.682
+
+r3 <- S/TS
+r3
+r4 <- 1-ES/TS
+r4
+r5 <- S/(S+ES)
+r5
+r8 <- 1-ESInfo/TS
+r8
+
+
+
+
+
+
+
+
+

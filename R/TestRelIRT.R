@@ -9,7 +9,8 @@
 #' @author {Huan Liu, University of Iowa, \email{huan-liu-1@@uiowa.edu}}
 #' @export
 
-TestRelIRT <- function(itemPara){
+
+TestRelIRT <- function(itemPara, convTable){
 
   if (ncol(itemPara) == 3){
     #  item parameters should be on the 1.702 metric
@@ -66,7 +67,7 @@ TestRelIRT <- function(itemPara){
   # error variance
 
   # claculate error variance
-  varianceError <- sum(itemParaAggr$PQ * itemParaAggr$weights)
+  varianceError2 <- sum(itemParaAggr$PQ * itemParaAggr$weights)
 
 
   ## observed score variance approach
@@ -87,39 +88,97 @@ TestRelIRT <- function(itemPara){
 
   }
 
-  # reverse column sequence
-  fxTheta <- fxTheta[, c(ncol(fxTheta):1)]
-
   # transform to data frame
   fxTheta <- as.data.frame(fxTheta)
 
-  # error variance 2
-  varianceError2 <- sum(apply(fxTheta, 1, function(x) sum(x * (c(numOfItem:0) - weighted.mean(c(numOfItem:0), x))^2))*quadPoints$weights)
-
-  # observed score variance
-
   # add quadrature weights
   fxTheta$weights <- quadPoints$weights
+  fxTheta$theta <- quadPoints$nodes
+
+  # weighted mean
+  fxTheta$weightedMean <- apply(fxTheta[1:(1+numOfItem)], 1, function(x)  weighted.mean(c(0:numOfItem), x))
+  fxTheta$weightedMeanSS <- apply(fxTheta[1:(1+numOfItem)], 1, function(x)  weighted.mean(convTable$roundedSS, x))
+
+
+  # weighted mean for raw score and scale score
+  weightedMean <- sum(fxTheta$weightedMean  * fxTheta$weights)
+  weightedMeanSS <- sum(fxTheta$weightedMeanSS  * fxTheta$weights)
+
+  # variance of True Y
+  varianceTrueX <- sum(fxTheta$weights * (fxTheta$weightedMean - weightedMean)^2)
+  varianceTrueXSS <- sum(fxTheta$weights * (fxTheta$weightedMeanSS - weightedMeanSS)^2)
+
+  # variance of error
+  for(i in 1:numOfQuad){
+    fxTheta[i,"varRaw"] <- sum( fxTheta[i,1:(1+numOfItem)] * (c(0:numOfItem) - fxTheta[i,"weightedMean"])^2)
+    fxTheta[i,"varSS"] <- sum( fxTheta[i,1:(1+numOfItem)] * (convTable$roundedSS - fxTheta[i,"weightedMeanSS"])^2)
+  }
+
+
+  # error variance
+  varianceError <- sum(fxTheta$varRaw * fxTheta$weights)
+  varianceErrorSS <- sum(fxTheta$varSS * fxTheta$weights)
+
+  # variance of Obs X
+  varianceObsX <- varianceError + varianceTrueX
+  varianceObsXSS <- varianceErrorSS + varianceTrueXSS
+
+
+  # variance of Obs X Approach 2
 
   # calculate weighted distribution
   fxThetaWeighted <- apply(fxTheta[,1:(1 + numOfItem)], 2, function(x) x * fxTheta[,"weights"])
 
   # sum weighted distribution
   fxDist <- as.data.frame(matrix(colSums(fxThetaWeighted[,1:(1 + numOfItem)]), nrow = (1 + numOfItem), ncol = 1))
-  fxDist$X <- c(numOfItem:0)
-  names(fxDist) <- c("wts", "X")
+  fxDist$X <- c(0:numOfItem)
+  fxDist$roundedSS <- convTable$roundedSS
+  names(fxDist) <- c("wts", "X","roundedSS")
 
-  # weighted mean of Obs X
+
+  # weighted mean of Obs X and Y
   weightedMean <- sum(fxDist$X * fxDist$wts)/sum(fxDist$wts)
+  weightedMeanSS <- sum(fxDist$roundedSS * fxDist$wts)/sum(fxDist$wts)
 
   # variance of Obs X
   varianceObsX <- sum(fxDist$wts * (fxDist$X - weightedMean)^2)
+  varianceObsXSS <- sum(fxDist$wts * (fxDist$roundedSS - weightedMeanSS)^2)
 
-  # test reliability
-  TestRelIRT <- 1 - varianceError2 / varianceObsX #  = 1 - varianceError / (varianceError + varianceTrue)
 
-  # return coefficient
-  return(TestRelIRT)
+  # IRT test reliability
+  TestRelIRT <- 1 - varianceError/(varianceError + varianceTrueX)
+  TestRelIRTSS <- 1 - varianceErrorSS/(varianceErrorSS + varianceTrueXSS)
+
+
+  VarandRel <- as.data.frame(matrix(c(varianceError, varianceTrueX, varianceObsX, TestRelIRT,
+                                      varianceErrorSS, varianceTrueXSS, varianceObsXSS, TestRelIRTSS
+  )))
+  rownames(VarandRel) <- c("Overall error variance for raw scores",
+                           "True score variance for raw scores",
+                           "Observed score variance for raw scores",
+                           "Reliability for raw scores",
+                           "Overall error variance for scale scores",
+                           "True score variance for scale scores",
+                           "Observed score variance for scale scores",
+                           "Reliability for scale scores")
+  colnames(VarandRel) <- "coefficient"
+  VarandRel
+
+
+  conditionalSEMs <- fxTheta[,c("theta", "weights","weightedMean", "varRaw", "weightedMeanSS", "varSS")]
+  names(conditionalSEMs) <- c("Theta", "weights","Ex_Raw", "Raw_Variance", "Ex_Scale", "Scale_Variance")
+  conditionalSEMs$Raw_CSEM <- sqrt(conditionalSEMs$Raw_Variance)
+  conditionalSEMs$Scale_CSEM <- sqrt(conditionalSEMs$Scale_Variance)
+  rownames(conditionalSEMs) <- 1:nrow(conditionalSEMs)
+
+
+
+  return(list("Fitted Frequencies" = fxDist,
+              "Variance and Reliability" = VarandRel,
+              "Conditional SEMs" = conditionalSEMs[,c("Theta", "weights",
+                                                      "Ex_Raw", "Ex_Scale", "Raw_CSEM", "Scale_CSEM")]))
+
+
 }
 
 

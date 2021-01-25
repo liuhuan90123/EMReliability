@@ -69,18 +69,18 @@ CSSEMKolen <- function(itemPara, convTable){
   fxThetaT$SS <- rev(convTable$roundedSS)
 
   # true scale score
-  fxThetaTSS <- as.data.frame(apply(fxThetaT[c(1:41)], 2, function(x) x * fxThetaT$SS))
+  fxThetaTSS <- as.data.frame(apply(fxThetaT[c(1:numOfQuad)], 2, function(x) x * fxThetaT$SS))
   fxThetaTSS$SS <- rev(convTable$roundedSS)
 
   # merge data
   fxThetaTSS <- rbind(fxThetaT, colSums(fxThetaTSS))
 
   # CSSEM condtional on theta
-  cssemKolen <- matrix(NA, nrow = 41, ncol = 1)
+  cssemKolen <- matrix(NA, nrow = numOfQuad, ncol = 1)
 
-  for (i in 1:41){
+  for (i in 1:numOfQuad){
 
-    cssemKolen[i, 1] <- sqrt(sum((fxThetaTSS[c(1:41),42] - fxThetaTSS[42, i])^2 * fxThetaTSS[c(1:41),i]))
+    cssemKolen[i, 1] <- sqrt(sum((fxThetaTSS[c(1:(numOfItem+1)),(numOfQuad+1)] - fxThetaTSS[(numOfItem+2), i])^2 * fxThetaTSS[c(1:(numOfItem+1)),i]))
 
   }
 

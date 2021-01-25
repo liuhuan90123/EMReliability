@@ -11,6 +11,27 @@ library(EMReliability)
 rawData_A <- read.table("TestData/FormA_31_3000.txt")
 rawData_B <- read.table("TestData/FormB_31_3000.txt")
 
+datA1 <- rawData_A[,c(1:13)]
+datA2 <- rawData_A[,c(14:25)]
+datA3 <- rawData_A[,c(26:31)]
+
+datB1 <- rawData_B[,c(1:13)]
+datB2 <- rawData_B[,c(14:25)]
+datB3 <- rawData_B[,c(26:31)]
+
+
+write.table(datA1, "datA1.dat", row.names = F, col.names = F)
+write.table(datA2, "datA2.dat", row.names = F, col.names = F)
+write.table(datA3, "datA3.dat", row.names = F, col.names = F)
+
+write.table(datB1, "datB1.dat", row.names = F, col.names = F)
+write.table(datB2, "datB2.dat", row.names = F, col.names = F)
+write.table(datB3, "datB3.dat", row.names = F, col.names = F)
+
+
+
+
+
 # read item parameters from txt file
 itemPara_A_UIRT <- read.table("TestData/SpanishLit_prm_A_UIRT.txt")[,c(7,8)]
 names(itemPara_A_UIRT) <- c("b", "a")
@@ -21,6 +42,16 @@ itemPara_B_UIRT <- read.table("TestData/SpanishLit_prm_B_UIRT.txt")[,c(7,8)]
 names(itemPara_B_UIRT) <- c("b", "a")
 itemPara_B_UIRT[,"b"] <- -itemPara_B_UIRT[,"b"]/itemPara_B_UIRT[,"a"]
 itemPara_B_UIRT[,"a"] <- itemPara_B_UIRT[,"a"]/1.702
+
+
+itemPara_A_UIRT$c <- 0
+itemPara_A_UIRT <- itemPara_A_UIRT[,c("a", "b", "c")]
+
+itemPara_B_UIRT$c <- 0
+itemPara_B_UIRT <- itemPara_B_UIRT[,c("a", "b", "c")]
+
+write.table(itemPara_A_UIRT, "itemPara_A_UIRT.txt", row.names = F, col.names = F)
+write.table(itemPara_B_UIRT, "itemPara_B_UIRT.txt", row.names = F, col.names = F)
 
 # change extreme b value
 itemPara_B_UIRT[3,1] <- -5
@@ -52,11 +83,194 @@ rawData_A <- read.table("TestData/FormA_31_3000.txt")
 strat_A <-  c(13, 12, 6)
 csemStratFeldt_A <- CSEMStratFeldt(rawData_A, strat_A)
 plot(csemStratFeldt_A$rawScore, csemStratFeldt_A$csemStratFeldt)
+write.xlsx(csemStratFeldt_A, "csemStratFeldt_A.xlsx", sheetName="csemStratFeldt_A")
+
+csemStratFeldt_A_Aggre <- aggregate(csemStratFeldt_A$csemStratFeldt, by=list(Category=csemStratFeldt_A$rawScore), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemStratFeldt_A_Aggre
 
 rawData_B <- read.table("TestData/FormA_31_3000.txt")
 strat_B <-  c(13, 12, 6)
 csemStratFeldt_B <- CSEMStratFeldt(rawData_B, strat_B)
 plot(csemStratFeldt_B$rawScore, csemStratFeldt_B$csemStratFeldt)
+write.xlsx(csemStratFeldt_B, "csemStratFeldt_B.xlsx", sheetName="csemStratFeldt_B")
+
+csemStratFeldt_B_Aggre <- aggregate(csemStratFeldt_B$csemStratFeldt, by=list(Category=csemStratFeldt_B$rawScore), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemStratFeldt_B_Aggre
+
+
+
+
+names(csemStratFeldt_A_Aggre) <- names(csemStratFeldt_B_Aggre) <- c("raw Score", "csemStratFeldt")
+
+
+write.xlsx(csemStratFeldt_A_Aggre, "csemStratFeldt_A_Aggre.xlsx")
+write.xlsx(csemStratFeldt_B_Aggre, "csemStratFeldt_B_Aggre.xlsx")
+
+
+
+
+
+
+
+### MIRT P method
+
+## SS form A
+csemMIRTSS_A <- read.table("EM_SS_CSEM_m_A.OUT", header = T)
+csemMIRTSS_A_raw <- csemMIRTSS_A[,c("Ex_Raw", "Raw_CSEM")]
+
+write.xlsx(csemMIRTSS_A_raw, "csemMIRTSS_A_raw.xlsx", sheetName="csemMIRTSS_A_raw")
+
+csemMIRTSS_A_raw$Ex_Raw <- round(csemMIRTSS_A_raw$Ex_Raw)
+csemMIRTSS_A_raw_Aggre <- aggregate(csemMIRTSS_A_raw$Raw_CSEM, by=list(Category=csemMIRTSS_A_raw$Ex_Raw), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTSS_A_raw_Aggre
+
+names(csemMIRTSS_A_raw_Aggre) <- c("raw Score", "csemMIRTSS_A_raw_Aggre")
+
+write.xlsx(csemMIRTSS_A_raw_Aggre, "csemMIRTSS_A_raw_Aggre.xlsx", sheetName="csemMIRTSS_A_raw_Aggre")
+
+
+## SS form B
+csemMIRTSS_B <- read.table("EM_SS_CSEM_m_B.OUT", header = T)
+csemMIRTSS_B_raw <- csemMIRTSS_B[,c("Ex_Raw", "Raw_CSEM")]
+
+write.xlsx(csemMIRTSS_B_raw, "csemMIRTSS_B_raw.xlsx", sheetName="csemMIRTSS_B_raw")
+
+csemMIRTSS_B_raw$Ex_Raw <- round(csemMIRTSS_B_raw$Ex_Raw)
+csemMIRTSS_B_raw_Aggre <- aggregate(csemMIRTSS_B_raw$Raw_CSEM, by=list(Category=csemMIRTSS_B_raw$Ex_Raw), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTSS_B_raw_Aggre
+
+names(csemMIRTSS_B_raw_Aggre) <- c("raw Score", "csemMIRTSS_B_raw_Aggre")
+
+write.xlsx(csemMIRTSS_B_raw_Aggre, "csemMIRTSS_B_raw_Aggre.xlsx", sheetName="csemMIRTSS_B_raw_Aggre")
+
+
+
+
+## BF form A
+csemMIRTBF_A <- read.table("EMBF_CSEM_M_A.OUT", header = T)
+csemMIRTBF_A_raw <- csemMIRTBF_A[,c("Ex_Raw", "Raw_CSEM")]
+
+write.xlsx(csemMIRTBF_A_raw, "csemMIRTBF_A_raw.xlsx", sheetName="csemMIRTBF_A_raw")
+
+csemMIRTBF_A_raw$Ex_Raw <- round(csemMIRTBF_A_raw$Ex_Raw)
+csemMIRTBF_A_raw_Aggre <- aggregate(csemMIRTBF_A_raw$Raw_CSEM, by=list(Category=csemMIRTBF_A_raw$Ex_Raw), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTBF_A_raw_Aggre
+
+names(csemMIRTBF_A_raw_Aggre) <- c("raw Score", "csemMIRTBF_A_raw_Aggre")
+
+write.xlsx(csemMIRTBF_A_raw_Aggre, "csemMIRTBF_A_raw_Aggre.xlsx", sheetName="csemMIRTBF_A_raw_Aggre")
+
+
+## BF form B
+csemMIRTBF_B <- read.table("EMBF_CSEM_M_B.OUT", header = T)
+csemMIRTBF_B_raw <- csemMIRTBF_B[,c("Ex_Raw", "Raw_CSEM")]
+
+write.xlsx(csemMIRTBF_B_raw, "csemMIRTBF_B_raw.xlsx", sheetName="csemMIRTBF_B_raw")
+
+csemMIRTBF_B_raw$Ex_Raw <- round(csemMIRTBF_B_raw$Ex_Raw)
+csemMIRTBF_B_raw_Aggre <- aggregate(csemMIRTBF_B_raw$Raw_CSEM, by=list(Category=csemMIRTBF_B_raw$Ex_Raw), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTBF_B_raw_Aggre
+
+names(csemMIRTBF_B_raw_Aggre) <- c("raw Score", "csemMIRTBF_B_raw_Aggre")
+
+write.xlsx(csemMIRTBF_B_raw_Aggre, "csemMIRTBF_B_raw_Aggre.xlsx", sheetName="csemMIRTBF_B_raw_Aggre")
+
+
+
+
+
+
+
+
+### MIRT P method     Scale score
+
+## SS form A
+csemMIRTSS_A <- read.table("EM_SS_CSEM_m_A.OUT", header = T)
+csemMIRTSS_A_ss <- csemMIRTSS_A[,c("Ex_Scale", "Scale_CSEM")]
+
+write.xlsx(csemMIRTSS_A_ss, "csemMIRTSS_A_ss.xlsx", sheetName="csemMIRTSS_A_ss")
+
+csemMIRTSS_A_ss$Ex_Scale <- round(csemMIRTSS_A_ss$Ex_Scale)
+csemMIRTSS_A_ss_Aggre <- aggregate(csemMIRTSS_A_ss$Scale_CSEM, by=list(Category=csemMIRTSS_A_ss$Ex_Scale), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTSS_A_ss_Aggre
+
+names(csemMIRTSS_A_ss_Aggre) <- c("scale Score", "csemMIRTSS_A_ss_Aggre")
+
+write.xlsx(csemMIRTSS_A_ss_Aggre, "csemMIRTSS_A_ss_Aggre.xlsx", sheetName="csemMIRTSS_A_ss_Aggre")
+
+
+## SS form B
+csemMIRTSS_B <- read.table("EM_SS_CSEM_m_B.OUT", header = T)
+csemMIRTSS_B_ss <- csemMIRTSS_B[,c("Ex_Scale", "Scale_CSEM")]
+
+write.xlsx(csemMIRTSS_B_ss, "csemMIRTSS_B_ss.xlsx", sheetName="csemMIRTSS_B_ss")
+
+csemMIRTSS_B_ss$Ex_Scale <- round(csemMIRTSS_B_ss$Ex_Scale)
+csemMIRTSS_B_ss_Aggre <- aggregate(csemMIRTSS_B_ss$Scale_CSEM, by=list(Category=csemMIRTSS_B_ss$Ex_Scale), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTSS_B_ss_Aggre
+
+names(csemMIRTSS_B_ss_Aggre) <- c("scale Score", "csemMIRTSS_B_ss_Aggre")
+
+write.xlsx(csemMIRTSS_B_ss_Aggre, "csemMIRTSS_B_ss_Aggre.xlsx", sheetName="csemMIRTSS_B_ss_Aggre")
+
+
+
+
+## BF form A
+csemMIRTBF_A <- read.table("EMBF_CSEM_M_A.OUT", header = T)
+csemMIRTBF_A_ss <- csemMIRTBF_A[,c("Ex_Scale", "Scale_CSEM")]
+
+write.xlsx(csemMIRTBF_A_ss, "csemMIRTBF_A_ss.xlsx", sheetName="csemMIRTBF_A_ss")
+
+csemMIRTBF_A_ss$Ex_Scale <- round(csemMIRTBF_A_ss$Ex_Scale)
+csemMIRTBF_A_ss_Aggre <- aggregate(csemMIRTBF_A_ss$Scale_CSEM, by=list(Category=csemMIRTBF_A_ss$Ex_Scale), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTBF_A_ss_Aggre
+
+names(csemMIRTBF_A_ss_Aggre) <- c("scale Score", "csemMIRTBF_A_ss_Aggre")
+
+write.xlsx(csemMIRTBF_A_ss_Aggre, "csemMIRTBF_A_ss_Aggre.xlsx", sheetName="csemMIRTBF_A_ss_Aggre")
+
+
+## BF form B
+csemMIRTBF_B <- read.table("EMBF_CSEM_M_B.OUT", header = T)
+csemMIRTBF_B_ss <- csemMIRTBF_B[,c("Ex_Scale", "Scale_CSEM")]
+
+write.xlsx(csemMIRTBF_B_ss, "csemMIRTBF_B_ss.xlsx", sheetName="csemMIRTBF_B_ss")
+
+csemMIRTBF_B_ss$Ex_Scale <- round(csemMIRTBF_B_ss$Ex_Scale)
+csemMIRTBF_B_ss_Aggre <- aggregate(csemMIRTBF_B_ss$Scale_CSEM, by=list(Category=csemMIRTBF_B_ss$Ex_Scale), FUN=function(x){sqrt(sum(x^2)/length(x))})
+csemMIRTBF_B_ss_Aggre
+
+names(csemMIRTBF_B_ss_Aggre) <- c("scale Score", "csemMIRTBF_B_ss_Aggre")
+
+write.xlsx(csemMIRTBF_B_ss_Aggre, "csemMIRTBF_B_ss_Aggre.xlsx", sheetName="csemMIRTBF_B_ss_Aggre")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# CSEM Lord
+csemLord <- CSEMLord(31)
+csemLord
+plot(csemLord$rawScore, csemLord$csemLord)
+
+library(xlsx)
+write.xlsx(csemLord, "csemLord_31.xlsx", sheetName="csemLord_31")
+
+
+
 
 
 
@@ -94,15 +308,72 @@ convTable_B <- read.csv("TestData/conversion_table_Form B.csv")
 convTable_B <- convTable_B[1:32, c("RawScore", "roundedSS")]
 
 
-KolenRelIRT_A_UIRT <- KolenRelIRT(itemPara_A_UIRT, convTable_A)
-KolenRelIRT_A_UIRT
 
-KolenRelIRT_B_UIRT <- KolenRelIRT(itemPara_B_UIRT, convTable_B)
-KolenRelIRT_B_UIRT
+# test reliability IRT
+TestRelIRT_A <- TestRelIRT(itemPara_A_UIRT, convTable_A)
+TestRelIRT_A
+
+TestRelIRT_B <- TestRelIRT(itemPara_B_UIRT, convTable_B)
+TestRelIRT_B
+
+
+
+write.xlsx(TestRelIRT_A$`Conditional SEMs`, "testCSEM_single_A.xlsx")
+write.xlsx(TestRelIRT_B$`Conditional SEMs`, "testCSEM_single_B.xlsx")
+
+
+TestRelIRT_A_SS <- TestRelIRT_A$`Conditional SEMs`[,c("Ex_Scale", "Scale_CSEM")]
+TestRelIRT_A_SS$roundedSS <- round(TestRelIRT_A_SS$Ex_Scale)
+TestRelIRT_A_SS_Aggre <- aggregate(TestRelIRT_A_SS$Scale_CSEM, by=list(Category=TestRelIRT_A_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+TestRelIRT_B_SS <- TestRelIRT_B$`Conditional SEMs`[,c("Ex_Scale", "Scale_CSEM")]
+TestRelIRT_B_SS$roundedSS <- round(TestRelIRT_B_SS$Ex_Scale)
+TestRelIRT_B_SS_Aggre <- aggregate(TestRelIRT_B_SS$Scale_CSEM, by=list(Category=TestRelIRT_B_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+
+names(TestRelIRT_A_SS_Aggre) <- names(TestRelIRT_B_SS_Aggre) <- c("roundedSS", "cssemKolen")
+
+
+write.xlsx(TestRelIRT_A_SS_Aggre, "TestRelIRT_A_SS_Aggre.xlsx")
+write.xlsx(TestRelIRT_B_SS_Aggre, "TestRelIRT_B_SS_Aggre.xlsx")
+
+
+
+TestRelIRT_A_SS <- TestRelIRT_A$`Conditional SEMs`[,c("Ex_Raw", "Raw_CSEM")]
+TestRelIRT_A_SS$roundedSS <- round(TestRelIRT_A_SS$Ex_Raw)
+TestRelIRT_A_SS_Aggre <- aggregate(TestRelIRT_A_SS$Raw_CSEM, by=list(Category=TestRelIRT_A_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+TestRelIRT_B_SS <- TestRelIRT_B$`Conditional SEMs`[,c("Ex_Raw", "Raw_CSEM")]
+TestRelIRT_B_SS$roundedSS <- round(TestRelIRT_B_SS$Ex_Raw)
+TestRelIRT_B_SS_Aggre <- aggregate(TestRelIRT_B_SS$Raw_CSEM, by=list(Category=TestRelIRT_B_SS$roundedSS), FUN=function(x){sqrt(sum(x^2)/length(x))})
+
+
+names(TestRelIRT_A_SS_Aggre) <- names(TestRelIRT_B_SS_Aggre) <- c("Raw", "cssemKolen")
+
+
+write.xlsx(TestRelIRT_A_SS_Aggre, "TestRelIRT_A_Raw_Aggre.xlsx")
+write.xlsx(TestRelIRT_B_SS_Aggre, "TestRelIRT_B_Raw_Aggre.xlsx")
 
 
 
 
+
+
+
+# KolenRelIRT_A_UIRT <- TestRelIRT(itemPara_A_UIRT, convTable_A)
+# KolenRelIRT_A_UIRT
+#
+# KolenRelIRT_B_UIRT <- KolenRelIRT(itemPara_B_UIRT, convTable_B)
+# KolenRelIRT_B_UIRT
+#
+#
+# CSSEMKolen_A <- as.data.frame(CSSEMKolen(itemPara_A_UIRT, convTable_A))
+# CSSEMKolen_A
+# write.xlsx(CSSEMKolen_A, "CSSEM_Kolen_A_MUIRT.xlsx")
+#
+# CSSEMKolen_B <- as.data.frame(CSSEMKolen(itemPara_B_UIRT, convTable_B))
+# CSSEMKolen_B
+# write.xlsx(CSSEMKolen_B, "CSSEM_Kolen_B_MUIRT.xlsx")
 
 # BI-Factor General
 

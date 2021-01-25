@@ -1,5 +1,53 @@
+# install.packages("mvnfast")
+library(mvnfast)
 
-MarginalRelSSMIRT_D_MLE <- function(itemPara, corvec, strat){
+library(mvtnorm)
+# Form A
+itemPara_SS_A <- read.table("TestData/SpanishLit_prm_A_SS.txt")[,c(7:10)]
+# item parameter transformation
+names(itemPara_SS_A) <- c("b", "a1","a2","a3")
+itemPara_SS_A$a <- c(itemPara_SS_A$a1[1:13], itemPara_SS_A$a2[14:25], itemPara_SS_A$a3[26:31])
+itemPara_SS_A[,"b"] <- -itemPara_SS_A[,"b"]/itemPara_SS_A[,"a"]
+itemPara_SS_A[,"a"] <- itemPara_SS_A[,"a"]/1.702
+itemPara_SS_A$a1[1:13] <- itemPara_SS_A$a[1:13]
+itemPara_SS_A$a2[14:25] <- itemPara_SS_A$a[14:25]
+itemPara_SS_A$a3[26:31] <- itemPara_SS_A$a[26:31]
+cormat_A <- matrix(c(1, 0.9067069, 0.6994119,
+                     0.9067069, 1, 0.4891160,
+                     0.6994119,0.4891160,1), nrow = 3)
+
+corvec <- c(0.9067069, 0.6994119, 0.4891160)
+strat <- c(13, 12, 6)
+
+itemPara <- itemPara_SS_A
+cormat <- cormat_A
+
+
+
+# Form B
+itemPara_SS_B <- read.table("TestData/SpanishLit_prm_B_SS.txt")[,c(7:10)]
+# item parameter transformation
+names(itemPara_SS_B) <- c("b", "a1","a2","a3")
+itemPara_SS_B$a <- c(itemPara_SS_B$a1[1:13], itemPara_SS_B$a2[14:25], itemPara_SS_B$a3[26:31])
+itemPara_SS_B[,"b"] <- -itemPara_SS_B[,"b"]/itemPara_SS_B[,"a"]
+itemPara_SS_B[,"a"] <- itemPara_SS_B[,"a"]/1.702
+itemPara_SS_B$a1[1:13] <- itemPara_SS_B$a[1:13]
+itemPara_SS_B$a2[14:25] <- itemPara_SS_B$a[14:25]
+itemPara_SS_B$a3[26:31] <- itemPara_SS_B$a[26:31]
+cormat_B <- matrix(c(1, 0.9722234, 0.5602197,
+                     0.9722234, 1, 0.4795721,
+                     0.5602197,0.4795721,1), nrow = 3)
+
+corvec <- c(0.9722234, 0.5602197, 0.47957210)
+strat <- c(13, 12, 6)
+
+itemPara <- itemPara_SS_B
+cormat <- cormat_B
+
+
+
+
+MarginalRelSSMIRT_D_MLE <- function(itemPara, cormat, strat){
   # number of factors
   numOfFactors <- length(strat)
 
@@ -9,7 +57,7 @@ MarginalRelSSMIRT_D_MLE <- function(itemPara, corvec, strat){
   # set nodes and weights
   nodes <- seq(-5, 5, length.out = numOfQuad)
   nodesM <- as.matrix(expand.grid(nodes,nodes,nodes))
-  weightsUnwtd <- dmvn(nodesM, c(0,0,0), cormat, log=FALSE)
+  weightsUnwtd <- dmvnorm(nodesM, c(0,0,0), cormat, log=FALSE)
   nodesM <- as.data.frame(nodesM)
   nodesM$weightsWtd <- weightsUnwtd / sum(weightsUnwtd)
   names(nodesM) <- c("theta1", "theta2", 'theta3',"weightsWtd")
@@ -54,14 +102,49 @@ MarginalRelSSMIRT_D_MLE <- function(itemPara, corvec, strat){
 
   # variance of composite score
   nodesM <- transform( nodesM,
-                       varC = se1^2 + se2^2  + se3^2  + 2 *corvec[1] * se1 * se2 + 2 *corvec[2] * se1 * se3 + 2 *corvec[3] * se2 * se3
+                       varC = se1^2 + se2^2  + se3^2#  + 2 *corvec[1] * se1 * se2 + 2 *corvec[2] * se1 * se3 + 2 *corvec[3] * se2 * se3
   )
 
   # average of error variance
   ErrorVarAvg <- sum(nodesM$varC * nodesM$weightsWtd)
+  ErrorVarAvg
+
+
+  # Form A
+  # MLE: 3.084788
+  # EAP: 3.366964
+
+  # Form B
+  # MLE: 3.286885
+  # EAP: 3.33247
+
+
+
+
+  # # variance of composite score
+  # nodesM <- transform( nodesM,
+  #                      var1 = se1^2 * weightsWtd,# + se2^2  + se3^2#  + 2 *corvec[1] * se1 * se2 + 2 *corvec[2] * se1 * se3 + 2 *corvec[3] * se2 * se3
+  #                      var2 = se2^2 * weightsWtd,# + se2^2  + se3^2
+  #                      var3 = se3^2 * weightsWtd# + se2^2  + se3^2
+  # )
+  #
+  # # average of error variance
+  #
+  # mean(nodesM$var1) + mean(nodesM$var2) + mean(nodesM$var3)
+  #
+  # ErrorVarAvg <- sum(nodesM$varC * nodesM$weightsWtd)
+  # ErrorVarAvg
+
+
+
+
+
 
   # marginal reliability approach
-  MarginalRelSSMIRT <- ErrorVarAvg /(ErrorVarAvg + numOfFactors) # var(e)/(var(e) + var(theta))
+  1 - ErrorVarAvg /(ErrorVarAvg + numOfFactors + 2 *(corvec[1] + corvec[2] + corvec[3])) # var(e)/(var(e) + var(theta))
+
+  MarginalRelSSMIRT <- (numOfFactors + 2 *(corvec[1] + corvec[2] + corvec[3]))/ (numOfFactors + 2 *(corvec[1] + corvec[2] + corvec[3]) + ErrorVarAvg)
+  # 7.19
 
   # coefficients
   MarginalRelSSMIRT
@@ -69,6 +152,8 @@ MarginalRelSSMIRT_D_MLE <- function(itemPara, corvec, strat){
 }
 
 
+
+# 0.7045
 
 
 ############# verification of SS MIRT marginal MLE ----------------------------------------------

@@ -1,3 +1,10 @@
+itemPara_A <- read.table("TestData/ItemParaFormX.txt")
+names(itemPara_A) <- c("b", "a")
+itemPara_A[,"a"] <- itemPara_A[,"a"]/1.702
+
+
+
+
 
 
 UIRTtoCTT <- function(itemPara){
@@ -86,7 +93,7 @@ UIRTtoCTT <- function(itemPara){
   })
 
   itemParaAggrCov <- aggregate(itemParaRep, by=list(Category=itemParaRep$b), FUN=sum)                       # covariance and lamda
-  lamda <- itemParaAggrCov$covi/varianceObsX
+
 
   ## observed score variance approach ---------------------------------------------------------------------  # varianceObsX
 
@@ -137,7 +144,7 @@ UIRTtoCTT <- function(itemPara){
   # test reliability
   #  = 1 - varianceError / (varianceError + varianceTrue)
 
-
+  lamda <- itemParaAggrCov$covi/varianceObsX
 
 
   cronbachAlphaUIRT <- numOfItem / (numOfItem-1) * (varianceObsX - sumItemVar)/varianceObsX

@@ -101,3 +101,49 @@ write.table(multhetaA, "multhetaA.txt", col.names = F, row.names = F, quote = F)
 
 multhetaB <- mvrnorm(n = 10000, c(0,0,0), cormat_B, tol = 1e-6, empirical = FALSE)
 write.table(multhetaB, "multhetaB.txt", col.names = F, row.names = F, quote = F)
+
+
+
+
+
+itemPara_BF <- read.table("TestData/SpanishLit_prm_A_BF.txt")[,c(7:11)]
+
+itemPara_BF <- itemPara_BF/1.7
+
+itemPara_BF <- itemPara_BF[,c(2:5,1)]
+
+itemPara_BF[,c(6)] <- 0
+
+write.table(itemPara_BF, "itemPara_BF_A.txt")
+
+
+
+
+NormalQuadraPoints <- function(n){
+
+  # set nodes ranging from -4 to 4
+  nodes <- seq(-4, 4, length.out = n)
+
+  # unnormalized weights
+  weightsUnwtd <- sapply(nodes, FUN = function(x) dnorm(x))
+
+  # normalized weightes
+  weightsWtd <- weightsUnwtd / sum(weightsUnwtd)
+
+  # return nodes and normalized weights
+  return(list("nodes" = nodes, "weights" = weightsWtd))
+
+}
+
+SingleWts <- as.data.frame(NormalQuadraPoints(41))
+
+SingleWts$nodes <- format(SingleWts$nodes, scientific = FALSE)
+# nodesM$weightsWtd <- format(nodesM$weightsWtd, scientific = FALSE)
+SingleWts$weights <- round(SingleWts$weights, 10)
+
+
+write.table(SingleWts, "Single.txt", row.names = F, col.names = F, quote = F)
+
+
+
+

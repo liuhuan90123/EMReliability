@@ -16,6 +16,18 @@
 
 RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
+  itemPara <- itemPara_A # test
+  convTable <- convTable_A
+  K <- 10
+  # estType <- "EAP"
+
+
+  itemPara <- itemPara_B # test
+  convTable <- convTable_B
+  K <- 10
+
+
+
   if (estType == "MLE"){
     # theta and weights
     theta <- NormalQuadraPoints(41)$nodes
@@ -30,6 +42,10 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
     # for loop to iterate different k
     for (k in 1:K){
+
+      k <- 4 # test
+
+      k <- 7 # test
 
       # fit model with k
       modelK <- lm(roundedSS ~ poly(theta, k, raw=TRUE), convTable)
@@ -56,7 +72,7 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
       }
 
       itemParaCSEM$SS <- itemParaCSEM$SS + regCoef[i+1]
-      itemParaCSEM$SS <- round(itemParaCSEM$SS)
+      # itemParaCSEM$SS <- round(itemParaCSEM$SS)
 
       # calculate transformation coefficients fx: from 1 to K
       itemParaCSEM$fx <- 0
@@ -82,7 +98,11 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
       SSVar <- sum(itemParaCSEM$wt * (itemParaCSEM$SS - weighted.mean(itemParaCSEM$SS, itemParaCSEM$wt))^2)
       errVar <- sum(itemParaCSEM$cssemPoly^2 * itemParaCSEM$wt)
-      relDat[k,1] <- 1 - errVar/SSVar
+      SSVar
+      errVar
+
+      # relDat[k,1] <- 1 - errVar/SSVar
+      relDat[k,1] <- 1 - errVar/(SSVar+errVar)
 
     }
 
@@ -97,6 +117,12 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
 
   }else if (estType == "EAP"){
+
+    k <- 4 # test
+
+    k <- 7 # test
+
+
     # theta and weights
     theta <- NormalQuadraPoints(41)$nodes
 
@@ -110,6 +136,7 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
     # for loop to iterate different k
     for (k in 1:K){
+
 
       # fit model with k
       modelK <- lm(roundedSS ~ poly(theta, k, raw=TRUE), convTable)
@@ -136,7 +163,7 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
       }
 
       itemParaCSEM$SS <- itemParaCSEM$SS + regCoef[i+1]
-      itemParaCSEM$SS <- round(itemParaCSEM$SS)
+      # itemParaCSEM$SS <- round(itemParaCSEM$SS)
 
       # calculate transformation coefficients fx: from 1 to K
       itemParaCSEM$fx <- 0
@@ -162,7 +189,13 @@ RelIRTPoly <- function(itemPara, convTable, K = 10, estType){
 
       SSVar <- sum(itemParaCSEM$wt * (itemParaCSEM$SS - weighted.mean(itemParaCSEM$SS, itemParaCSEM$wt))^2)
       errVar <- sum(itemParaCSEM$cssemPoly^2 * itemParaCSEM$wt)
-      relDat[k,1] <- 1 - errVar/SSVar
+
+      SSVar
+      errVar
+
+
+      # relDat[k,1] <- 1 - errVar/SSVar
+      relDat[k,1] <- 1 - errVar/(SSVar+errVar)
 
     }
 
